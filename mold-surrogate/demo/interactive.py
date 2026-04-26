@@ -270,8 +270,8 @@ design iteration. A surrogate makes that real-time, enabling a designer to inter
 ask "what if I move the gate?" or "what if I make this section thinner?" and get a useful
 answer in milliseconds — instead of staring at a progress bar.
 
-This is a research prototype with simplified physics (isothermal, Newtonian, 2D Hele-Shaw
-eikonal). It is not a Moldflow replacement.
+This is for my personal research only, with simplified physics (isothermal, Newtonian,
+2D Hele-Shaw eikonal). It is not a Moldflow replacement.
     """)
 
 st.caption(f"Model on **{device.upper()}** · grid {grid_size[0]}×{grid_size[1]} · "

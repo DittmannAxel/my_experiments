@@ -34,7 +34,7 @@ The repository contains:
 
 ## What this is *not*
 
-This is a **research prototype**, not a Moldflow replacement. The physics is
+This is **for my personal research only**, not a Moldflow replacement. The physics is
 simplified along several axes:
 
 - **Isothermal**: no thermal boundary layer, no frozen layer growth
