@@ -192,6 +192,19 @@ The U-Net here is a deliberately simpler choice for understandability. See
 
 ---
 
+## How to use this experiment
+
+A surrogate is an *approximation* of the solver — fast, but with bounded error
+and no built-in "I don't know" mechanism on geometries it has never seen. The
+solver is slower but deterministic within its own physics assumptions. They
+are complements, not replacements.
+
+So in practice the workflow is: **use the surrogate for fast interactive
+exploration of design candidates, then validate the final candidate(s) with
+the slower solver before committing.**
+
+---
+
 ## License
 
 MIT. Use as you like, no warranty.
