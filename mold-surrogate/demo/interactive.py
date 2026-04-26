@@ -274,5 +274,4 @@ This is for my personal research only, with simplified physics (isothermal, Newt
 2D Hele-Shaw eikonal). It is not a Moldflow replacement.
     """)
 
-st.caption(f"Model on **{device.upper()}** · grid {grid_size[0]}×{grid_size[1]} · "
-           f"hosted on 192.168.21.230 (LAN only)")
+st.caption(f"Model on **{device.upper()}** · grid {grid_size[0]}×{grid_size[1]}")
