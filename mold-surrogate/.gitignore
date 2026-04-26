@@ -9,11 +9,14 @@ __pycache__/
 .venv/
 venv/
 
-# Optional: keep the small sandbox dataset and checkpoint in git for inspection,
-# but exclude larger ones generated locally
-data/train_dataset.npz
-data/test_dataset.npz
+# Build instructions are local-only — do not publish
+CLAUDE.md
+
+# Exclude generated datasets and checkpoints — too large for git
+data/*.npz
 models/*.pt
+models/*.json
 !models/.gitkeep
 
 assets/demo.mp4
+models/evaluation_report.json
