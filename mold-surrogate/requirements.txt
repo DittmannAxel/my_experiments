@@ -1,0 +1,16 @@
+# Core dependencies
+# IMPORTANT: For local development with GPU, replace torch with the CUDA build:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu124
+
+torch>=2.0
+numpy>=1.24
+scipy>=1.10
+scikit-fmm>=2024.0
+matplotlib>=3.7
+tqdm>=4.65
+
+# For interactive demo
+streamlit>=1.30
+
+# Optional, for migration to FNO surrogate (see CLAUDE.md Step 7)
+# nvidia-physicsnemo>=0.5

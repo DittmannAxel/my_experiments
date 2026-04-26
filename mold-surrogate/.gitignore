@@ -1,0 +1,19 @@
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+.DS_Store
+.vscode/
+.idea/
+*.egg-info/
+.venv/
+venv/
+
+# Optional: keep the small sandbox dataset and checkpoint in git for inspection,
+# but exclude larger ones generated locally
+data/train_dataset.npz
+data/test_dataset.npz
+models/*.pt
+!models/.gitkeep
+
+assets/demo.mp4
