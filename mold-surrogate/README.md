@@ -7,11 +7,11 @@
 
 ![Solver vs Surrogate Comparison](assets/comparison.png)
 
-**Short walkthrough video** (click the thumbnail to play):
+**Short walkthrough:**
 
-[![Watch demo (click to play)](assets/comparison.png)](https://github.com/DittmannAxel/my_experiments/raw/main/mold-surrogate/assets/short_demo.mp4)
+![demo](assets/short_demo.gif)
 
-<video src="https://github.com/DittmannAxel/my_experiments/raw/main/mold-surrogate/assets/short_demo.mp4" controls muted width="640"></video>
+Full-quality 720p MP4: [`assets/short_demo.mp4`](assets/short_demo.mp4) (2.3 MB)
 
 ---
 
