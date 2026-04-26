@@ -61,6 +61,12 @@ def make_figure(model, n_samples: int = 4, output_path: Path = Path("assets/comp
     cmap_ft = "viridis"
     cmap_air = "Reds"
 
+    # Warmup the surrogate so the first timed call doesn't include lazy init
+    _warm_geom = generate_random_part(grid_size=grid_size, seed=seed_start - 1)
+    for _ in range(3):
+        predict(model, _warm_geom.thickness, _warm_geom.gate_mask,
+                _warm_geom.cavity_mask, device)
+
     solver_times = []
     surrogate_times = []
 
