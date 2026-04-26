@@ -80,15 +80,27 @@ def build_dataset(n_samples: int, output_path: Path, grid_size=(64, 96), seed_of
     elapsed = time.time() - t0
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    # Pack metadata into parallel arrays for compact NPZ storage
+    shape_types = np.array([m["shape_type"] for m in metadata])
+    base_thickness = np.array([m["base_thickness_mm"] for m in metadata], dtype=np.float32)
+    n_ribs_arr = np.array([m["n_ribs"] for m in metadata], dtype=np.int32)
+    seeds_arr = np.array([m["seed"] for m in metadata], dtype=np.int64)
     np.savez_compressed(
         output_path,
         inputs=X, targets=Y, masks=M,
         grid_size=np.array(grid_size),
+        shape_types=shape_types,
+        base_thickness_mm=base_thickness,
+        n_ribs=n_ribs_arr,
+        seeds=seeds_arr,
     )
     print(f"\nSaved {n_samples} samples to {output_path}")
     print(f"  Input shape:  {X.shape} ({X.nbytes / 1e6:.1f} MB)")
     print(f"  Target shape: {Y.shape} ({Y.nbytes / 1e6:.1f} MB)")
     print(f"  Generation time: {elapsed:.1f}s ({elapsed / n_samples * 1000:.1f} ms/sample)")
+    # Print shape distribution
+    unique, counts = np.unique(shape_types, return_counts=True)
+    print(f"  Shape distribution: {dict(zip(unique.tolist(), counts.tolist()))}")
     return X, Y, M
 
 
