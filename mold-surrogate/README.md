@@ -7,6 +7,9 @@
 
 ![Solver vs Surrogate Comparison](assets/comparison.png)
 
+▶️ **Short walkthrough video:** [`assets/short_demo.mp4`](assets/short_demo.mp4)
+(click to view; 37 MB)
+
 ---
 
 ## What this is
