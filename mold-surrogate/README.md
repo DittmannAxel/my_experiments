@@ -195,10 +195,3 @@ The U-Net here is a deliberately simpler choice for understandability. See
 ## License
 
 MIT. Use as you like, no warranty.
-
-## Acknowledgments
-
-Built as an interview-preparation artifact for an NVIDIA Developer Relations
-Manufacturing role. The Hele-Shaw eikonal approach follows Hieber & Shen
-(1980), J. Non-Newtonian Fluid Mechanics. The U-Net architecture follows
-Ronneberger et al. (2015) with modern improvements (GroupNorm, SiLU).
