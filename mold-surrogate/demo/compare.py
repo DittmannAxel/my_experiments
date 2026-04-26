@@ -24,12 +24,14 @@ from dataset import encode_gate_distance
 from model import UNetSurrogate
 
 
-def load_model(ckpt_path: Path, device: str = "cpu") -> UNetSurrogate:
+def load_model(ckpt_path: Path, device: str = "cpu"):
     state = torch.load(ckpt_path, map_location=device, weights_only=False)
     model = UNetSurrogate(**state["config"])
     model.load_state_dict(state["model"])
-    model.to(device).eval()
-    return model
+    model.to(device)
+    model.eval()
+    grid_size = tuple(state.get("grid_size", [64, 96]))
+    return model, grid_size
 
 
 def predict(model: UNetSurrogate, thickness: np.ndarray, gate_mask: np.ndarray,
@@ -50,12 +52,12 @@ def predict(model: UNetSurrogate, thickness: np.ndarray, gate_mask: np.ndarray,
 
 
 def make_figure(model, n_samples: int = 4, output_path: Path = Path("assets/comparison.png"),
-                seed_start: int = 1000, device: str = "cpu"):
+                seed_start: int = 1000, device: str = "cpu",
+                grid_size: tuple = (64, 96)):
     fig, axes = plt.subplots(n_samples, 6, figsize=(18, 3 * n_samples))
     if n_samples == 1:
         axes = axes[None, :]
 
-    # Custom colormap for fill time (white → blue → orange → dark red)
     cmap_ft = "viridis"
     cmap_air = "Reds"
 
@@ -63,7 +65,7 @@ def make_figure(model, n_samples: int = 4, output_path: Path = Path("assets/comp
     surrogate_times = []
 
     for i in range(n_samples):
-        geom = generate_random_part(seed=seed_start + i)
+        geom = generate_random_part(grid_size=grid_size, seed=seed_start + i)
         cm = geom.cavity_mask
 
         # Solver (ground truth)
@@ -144,5 +146,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = load_model(Path(args.checkpoint), device=device)
-    make_figure(model, n_samples=args.n, output_path=Path(args.out), device=device)
+    model, grid_size = load_model(Path(args.checkpoint), device=device)
+    print(f"Using device={device}, grid={grid_size}")
+    make_figure(model, n_samples=args.n, output_path=Path(args.out),
+                device=device, grid_size=grid_size)
