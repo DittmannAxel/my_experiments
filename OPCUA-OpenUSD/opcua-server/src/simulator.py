@@ -127,9 +127,14 @@ class Simulator:
                         ua.Variant(new_cycle, ua.VariantType.UInt64)
                     )
 
-            # ProgramState heartbeat: cycle 2→3→0→2 every 30 s (only when
-            # not externally pinned to a non-heartbeat state like 6).
-            if program_state in (2, 3, 0) and (now - last_state_change) > 30.0:
+            # ProgramState heartbeat. The cycle is 2→3→0→2; we stay long in
+            # Running (= moving) and short in Stopping / Idle so the demo
+            # spends most of its wall-clock visibly producing.
+            #   Running   → 60 s
+            #   Stopping  →  4 s
+            #   Idle      →  4 s
+            duration = {2: 60.0, 3: 4.0, 0: 4.0}.get(program_state, 60.0)
+            if program_state in (2, 3, 0) and (now - last_state_change) > duration:
                 program_state = {2: 3, 3: 0, 0: 2}.get(program_state, 2)
                 await self.addr.program_state.write_value(
                     ua.Variant(program_state, ua.VariantType.Int32)
