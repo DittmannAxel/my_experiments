@@ -249,7 +249,14 @@ function applySnapshot(snap) {
   document.getElementById("sum-alerts").textContent = String(overheats);
   const alertsState = document.getElementById("alerts-state");
   const alertsTag = document.getElementById("alerts-tag");
-  if (overheats > 0) {
+  // When the agent has filed a recommendation, surface that as the headline
+  // so the connection between "alert" and "agent reasoning" is unambiguous.
+  const hasAgentReco = snap.active_recommendation && snap.active_recommendation.title;
+  if (hasAgentReco) {
+    alertsState.textContent = "Agentic alert pending";
+    alertsState.style.color = "var(--red)";
+    alertsTag.textContent = "MAF agent posted a recommendation — see panel below";
+  } else if (overheats > 0) {
     alertsState.textContent = `${overheats} active alert${overheats > 1 ? "s" : ""}`;
     alertsState.style.color = "var(--red)";
     alertsTag.textContent = "Motor overheat threshold exceeded";
