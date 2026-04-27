@@ -11,7 +11,7 @@ from .retriever import Chunk
 log = logging.getLogger("generator")
 
 VLLM_BASE_URL = os.environ.get("VLLM_BASE_URL", "http://host.docker.internal:8000/v1")
-VLLM_MODEL = os.environ.get("VLLM_MODEL", "nvidia/Llama-3.1-Nemotron-Nano-8B-v1")
+VLLM_MODEL = os.environ.get("VLLM_MODEL", "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-FP8")
 
 SYSTEM_PROMPT = (
     "You are an OPC UA specification expert. Answer the user's question using "
@@ -42,13 +42,14 @@ async def answer(question: str, chunks: list[Chunk]) -> str:
     resp = await client.chat.completions.create(
         model=VLLM_MODEL,
         messages=[
-            # Nemotron expects strict role alternation, so the reasoning
-            # toggle is folded into the main system message.
-            {"role": "system", "content": "detailed thinking off\n\n" + SYSTEM_PROMPT},
+            {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": user_msg},
         ],
         temperature=0.1,
         max_tokens=1024,
+        # Nemotron-3 thinking mode toggle. "off" → straight-to-answer for
+        # the spec query (we don't surface the chain-of-thought in the UI).
+        extra_body={"chat_template_kwargs": {"enable_thinking": False}},
     )
     msg = resp.choices[0].message
     return (msg.content or getattr(msg, "reasoning", None) or "").strip()

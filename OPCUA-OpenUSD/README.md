@@ -165,10 +165,16 @@ performance / alerts row, the spec chat, and the HITL recommendation card.
 The agent (service `maf-agent`) is built on the
 [Microsoft Agent Framework](https://github.com/microsoft/agent-framework)
 (GA, `agent-framework` 1.2.0). It uses `agent_framework.Agent` with the
-`OpenAIChatClient` pointed at the bare-metal vLLM. vLLM is launched with
-`--enable-auto-tool-choice --tool-call-parser llama3_json`, which is what
-makes Llama-3.1-Nemotron-Nano-8B return `tool_calls` on the
-OpenAI-compatible endpoint.
+`OpenAIChatClient` pointed at the bare-metal vLLM. vLLM serves
+**`nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-FP8`** by default — a 30 B-parameter
+Mamba2 + Transformer hybrid MoE that activates only ~3.5 B parameters per
+token, fits in ~17 GB FP8 on a single RTX 6000 Ada, and ships native tool
+calling (BFCL v4 ≈ 53). Launch flags:
+`--tool-call-parser qwen3_coder --reasoning-parser nano_v3
+--reasoning-parser-plugin scripts/nano_v3_reasoning_parser.py
+--kv-cache-dtype fp8 --trust-remote-code`. The thinking trace is
+toggled per request via `chat_template_kwargs.enable_thinking=False` so
+the recommendation arrives as a single fast tool call.
 
 Two `@tool` functions:
 
@@ -208,8 +214,10 @@ docker compose up -d                     # ≈10–15 min on first run (RAG embe
 - Docker 29.4+, Docker Compose v2, NVIDIA Container Runtime registered
 - 2× modern NVIDIA RTX-class GPUs (≥48 GB each recommended)
 - bare-metal vLLM on `:8000` (`VLLM_MODEL` in `.env`); containers reach it via
-  `host.docker.internal:8000`. Tested with `nvidia/Llama-3.1-Nemotron-Nano-8B-v1`
-  on GPU 0; sample launcher at `scripts/launch_vllm_nemotron_gpu0.sh`.
+  `host.docker.internal:8000`. Default model:
+  `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-FP8` on GPU 0; launcher at
+  `scripts/launch_vllm_nemotron3_gpu0.sh` (also vendors the
+  `nano_v3_reasoning_parser.py` plugin from the model card).
 - GPU 1 is reserved for the Omniverse Kit container
 
 ## Phase status

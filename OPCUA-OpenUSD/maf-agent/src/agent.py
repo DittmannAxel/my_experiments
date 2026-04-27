@@ -2,8 +2,8 @@
 
 Uses `agent-framework` (GA) with the OpenAIChatClient pointed at the
 bare-metal vLLM serving an OpenAI-compatible endpoint
-(default model: nvidia/Llama-3.1-Nemotron-Nano-8B-v1, started with
-`--enable-auto-tool-choice --tool-call-parser llama3_json`).
+(default model: nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-FP8, served with
+`--tool-call-parser qwen3_coder` and the nano_v3 reasoning parser plugin).
 
 The two advisory tools are decorated with @tool. Both are
 `approval_mode="never_require"` because the human-in-the-loop in this
@@ -29,10 +29,13 @@ from .anomaly_detector import AnomalyEvent
 log = logging.getLogger("agent")
 
 VLLM_BASE_URL = os.environ.get("VLLM_BASE_URL", "http://host.docker.internal:8000/v1")
-VLLM_MODEL = os.environ.get("VLLM_MODEL", "nvidia/Llama-3.1-Nemotron-Nano-8B-v1")
+VLLM_MODEL = os.environ.get("VLLM_MODEL", "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-FP8")
+# Nemotron-3 uses the nano_v3 reasoning parser server-side, so we don't
+# need the `detailed thinking off` prelude that Nemotron-Nano-8B-v1 took
+# in the system message — we control thinking via chat_template_kwargs
+# (enable_thinking=False) on the request instead.
 SYSTEM_PROMPT = (
-    "detailed thinking off\n\n"
-    + Path(os.environ.get("PROMPTS_DIR", "/app/prompts"))
+    Path(os.environ.get("PROMPTS_DIR", "/app/prompts"))
     .joinpath("system.md")
     .read_text()
 )
@@ -136,7 +139,16 @@ async def handle_anomaly(ev: AnomalyEvent) -> None:
     try:
         result = await agent.run(
             _format_anomaly(ev),
-            options={"max_tokens": 4096, "temperature": 0.2, "tool_choice": "auto"},
+            options={
+                "max_tokens": 4096,
+                "temperature": 0.2,
+                "tool_choice": "auto",
+                # Nemotron-3 ships a thinking mode that's on by default.
+                # For a single anomaly → recommendation hop we want a fast,
+                # deterministic tool call, so disable it via the model's
+                # native chat-template flag.
+                "extra_body": {"chat_template_kwargs": {"enable_thinking": False}},
+            },
         )
     except Exception:
         log.exception("Agent run failed")

@@ -172,7 +172,7 @@ services:
     environment:
       - PGVECTOR_DSN=postgresql://rag:rag@pgvector:5432/rag
       - VLLM_BASE_URL=${VLLM_BASE_URL:-http://host.docker.internal:8000/v1}
-      - VLLM_MODEL=${VLLM_MODEL:-nvidia/Llama-3.1-Nemotron-Nano-8B-v1}
+      - VLLM_MODEL=${VLLM_MODEL:-nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-FP8}
       - PORT=49322
     networks:
       - stack
@@ -194,7 +194,7 @@ services:
       - OPCUA_PASSWORD=${OPCUA_PASSWORD:-changeme-please}
       - RAG_URL=http://rag-mcp:49322/api/specification/query
       - VLLM_BASE_URL=${VLLM_BASE_URL:-http://host.docker.internal:8000/v1}
-      - VLLM_MODEL=${VLLM_MODEL:-nvidia/Llama-3.1-Nemotron-Nano-8B-v1}
+      - VLLM_MODEL=${VLLM_MODEL:-nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-FP8}
     networks:
       - stack
 
