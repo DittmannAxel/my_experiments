@@ -40,20 +40,35 @@ def seed_stage_dir():
 
 
 async def writer_loop(snap: Snapshot, writer: UsdWriter):
-    """Drive USD writes when snap is dirty, no faster than every 50 ms."""
-    last_seen = 0.0
+    """Drive USD writes at ~10 Hz so the viewer always sees the latest snap.
+
+    Earlier this gated on snap.is_dirty_since(), which turned out to never
+    fire under load — likely an interaction between asyncua's notification
+    dispatcher and our shared Snapshot object. Unconditional 10 Hz writes
+    are cheaper than chasing that bug and give a deterministic ~100 ms
+    USD-update floor.
+    """
+    last_log_ts = 0.0
+    write_count = 0
     while True:
-        await asyncio.sleep(0.05)
-        if snap.is_dirty_since(last_seen):
-            last_seen = snap.last_change_ts
-            try:
-                writer.write_batch(
-                    joint_angles_deg=dict(snap.joint_angles_deg),
-                    motor_temps_c=dict(snap.motor_temps_c),
-                    program_state=snap.program_state,
+        await asyncio.sleep(0.10)
+        try:
+            writer.write_batch(
+                joint_angles_deg=dict(snap.joint_angles_deg),
+                motor_temps_c=dict(snap.motor_temps_c),
+                program_state=snap.program_state,
+            )
+            write_count += 1
+            now = time.monotonic()
+            if now - last_log_ts > 30.0:
+                log.info(
+                    "writer_loop alive: %d writes in last %.1fs, ps=%s",
+                    write_count, now - last_log_ts, snap.program_state,
                 )
-            except Exception as e:  # don't let one bad batch kill the loop
-                log.warning("usd write_batch failed: %s", e)
+                last_log_ts = now
+                write_count = 0
+        except Exception as e:
+            log.warning("usd write_batch failed: %s", e)
 
 
 async def main():
