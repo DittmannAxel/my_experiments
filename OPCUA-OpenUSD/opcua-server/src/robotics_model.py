@@ -213,6 +213,53 @@ async def build_address_space(server: Server) -> AddressSpace:
     async def approve_recommendation(parent, reco_id: str, approved: bool):  # noqa: ARG001
         addr.last_approval = {"id": reco_id, "approved": approved}
         addr.approval_event.set()
+        if not approved:
+            # Reject — clear recommendation, do nothing else.
+            try:
+                await active_reco.write_value(
+                    ua.Variant("", ua.VariantType.String)
+                )
+            except Exception:
+                pass
+            return ua.StatusCode(ua.StatusCodes.Good)
+
+        # Approved — parse the active recommendation and apply its actions.
+        import json
+        try:
+            blob = await active_reco.read_value()
+            if not blob:
+                return ua.StatusCode(ua.StatusCodes.BadInvalidState)
+            payload = json.loads(blob)
+        except Exception:
+            return ua.StatusCode(ua.StatusCodes.BadInvalidState)
+
+        for action in payload.get("actions", []):
+            node_id = action.get("node_id")
+            value = action.get("value")
+            if not node_id:
+                continue
+            # Map browse-path style (RobotController.ProgramState) to a node.
+            if node_id == "RobotController.ProgramState":
+                target = program_state
+                vt = ua.VariantType.Int32
+                v = ua.Variant(int(value), vt)
+            else:
+                # Unknown action target — skip silently for PoC.
+                continue
+            try:
+                await target.write_value(v)
+            except Exception:
+                pass
+
+        # Mark the recommendation as approved (rewrite as approved=true).
+        try:
+            payload["approved"] = True
+            await active_reco.write_value(
+                ua.Variant(json.dumps(payload), ua.VariantType.String)
+            )
+        except Exception:
+            pass
+
         return ua.StatusCode(ua.StatusCodes.Good)
 
     await reco_obj.add_method(
