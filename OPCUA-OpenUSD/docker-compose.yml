@@ -142,6 +142,41 @@ services:
       timeout: 3s
       retries: 5
 
+  pgvector:
+    build: ./pgvector
+    container_name: rt-pgvector
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${PGVECTOR_PASSWORD:-postgres}
+    volumes:
+      - pgvector-data:/var/lib/postgresql/data
+    networks:
+      - stack
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d rag || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 20s
+
+  rag-mcp:
+    build: ./rag-mcp
+    container_name: rt-rag-mcp
+    restart: unless-stopped
+    depends_on:
+      pgvector:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - PGVECTOR_DSN=postgresql://rag:rag@pgvector:5432/rag
+      - VLLM_BASE_URL=${VLLM_BASE_URL:-http://host.docker.internal:8000/v1}
+      - VLLM_MODEL=${VLLM_MODEL:-Qwen/Qwen3.6-35B-A3B}
+      - PORT=49322
+    networks:
+      - stack
+
 networks:
   stack:
     name: stack
@@ -153,3 +188,4 @@ volumes:
   influxdb-data:
   influxdb-config:
   grafana-data:
+  pgvector-data:

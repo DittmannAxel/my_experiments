@@ -45,11 +45,14 @@ http:
     #   tls: {}
 
     # ──────────── Phase 5: rag-mcp ────────────
-    # spec:
-    #   rule: "Host(`stack.local`) && PathPrefix(`/spec`)"
-    #   service: spec
-    #   entryPoints: [websecure]
-    #   tls: {}
+    spec:
+      rule: "Host(`stack.local`) && PathPrefix(`/spec`)"
+      service: spec
+      priority: 100
+      entryPoints: [websecure]
+      tls: {}
+      middlewares:
+        - spec-strip
 
   services:
     landing:
@@ -69,7 +72,13 @@ http:
     #   loadBalancer:
     #     servers:
     #       - url: "http://omniverse-kit:8443"
-    # spec:
-    #   loadBalancer:
-    #     servers:
-    #       - url: "http://rag-mcp:49322"
+    spec:
+      loadBalancer:
+        servers:
+          - url: "http://rag-mcp:49322"
+
+  middlewares:
+    spec-strip:
+      stripPrefix:
+        prefixes:
+          - "/spec"
