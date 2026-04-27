@@ -1,0 +1,12 @@
+--- a/src/Window.tsx
++++ b/src/Window.tsx
+@@ private _onStreamStarted(): void {
++        // Bypass the broken loadingStateQuery poll: in
++        // @nvidia/omniverse-webrtc-streaming-library@5.17.0 the addCallback
++        // path does `'event_type' in <stringified-msg>` and throws
++        // TypeError, so the loading overlay never clears. The MediaStream
++        // is already attached to <video id="remote-video"> by AppStream by
++        // this point — just unhide it.
++        this.setState({ isKitReady: true, isLoading: false, showStream: true, loadingText: "" });
+         this._pollForKitReady()
+     }
