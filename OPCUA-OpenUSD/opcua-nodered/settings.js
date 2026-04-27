@@ -14,9 +14,10 @@ module.exports = {
 
   // Path prefix — must match Traefik route below.
   httpAdminRoot: "/nodered",
-  httpNodeRoot:  "/nodered/api",
+  httpNodeRoot:  "/nodered",
 
-  // Dashboard 2.0 mounts under httpAdminRoot by default; explicit just in case.
+  // Dashboard 2.0 mounts at httpNodeRoot + ui-base.path. We set ui-base.path
+  // to "/dashboard" in flows.json so the dashboard lives at /nodered/dashboard/.
   ui: { path: "/nodered/ui" },
 
   // Disable projects (we use plain flows.json on disk).

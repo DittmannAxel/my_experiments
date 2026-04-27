@@ -22,7 +22,7 @@
     "id": "ui.base",
     "type": "ui-base",
     "name": "Robot Twin",
-    "path": "/nodered/ui",
+    "path": "/dashboard",
     "appIcon": "",
     "showPathInSidebar": false,
     "showPageTitle": true,
@@ -154,7 +154,7 @@
     "disabled": false
   },
   {
-    "id": "66a36d2c21cf4587",
+    "id": "b7f7b63f1d7e4e07",
     "type": "inject",
     "z": "tab.live",
     "name": "poll axis1_pos",
@@ -178,12 +178,12 @@
     "y": 100,
     "wires": [
       [
-        "fd958dcef177422c"
+        "f4e5dd8832bf4df7"
       ]
     ]
   },
   {
-    "id": "fd958dcef177422c",
+    "id": "f4e5dd8832bf4df7",
     "type": "OpcUa-Item",
     "z": "tab.live",
     "name": "axis1_pos",
@@ -194,12 +194,12 @@
     "y": 100,
     "wires": [
       [
-        "da21f0841cdf4021"
+        "89a9309fc67f4903"
       ]
     ]
   },
   {
-    "id": "da21f0841cdf4021",
+    "id": "89a9309fc67f4903",
     "type": "OpcUa-Client",
     "z": "tab.live",
     "endpoint": "opcua.endpoint",
@@ -218,12 +218,12 @@
     "y": 100,
     "wires": [
       [
-        "9fab67f7684c46da"
+        "0abc11d64e25430b"
       ]
     ]
   },
   {
-    "id": "9fab67f7684c46da",
+    "id": "0abc11d64e25430b",
     "type": "ui-gauge",
     "z": "tab.live",
     "group": "ui.grp.joints",
@@ -252,7 +252,7 @@
     "className": ""
   },
   {
-    "id": "fb30b768084344fe",
+    "id": "1489c0dba0554f3d",
     "type": "inject",
     "z": "tab.live",
     "name": "poll axis2_pos",
@@ -276,12 +276,12 @@
     "y": 170,
     "wires": [
       [
-        "2fb02adef9cb484a"
+        "638beb8dd73f401d"
       ]
     ]
   },
   {
-    "id": "2fb02adef9cb484a",
+    "id": "638beb8dd73f401d",
     "type": "OpcUa-Item",
     "z": "tab.live",
     "name": "axis2_pos",
@@ -292,12 +292,12 @@
     "y": 170,
     "wires": [
       [
-        "4caa994399004a43"
+        "6d8c5d1e0ac64224"
       ]
     ]
   },
   {
-    "id": "4caa994399004a43",
+    "id": "6d8c5d1e0ac64224",
     "type": "OpcUa-Client",
     "z": "tab.live",
     "endpoint": "opcua.endpoint",
@@ -316,12 +316,12 @@
     "y": 170,
     "wires": [
       [
-        "f313bd37630e4fc1"
+        "30f686870e824392"
       ]
     ]
   },
   {
-    "id": "f313bd37630e4fc1",
+    "id": "30f686870e824392",
     "type": "ui-gauge",
     "z": "tab.live",
     "group": "ui.grp.joints",
@@ -350,7 +350,7 @@
     "className": ""
   },
   {
-    "id": "0325651b645b48ae",
+    "id": "866faf43fc32491b",
     "type": "inject",
     "z": "tab.live",
     "name": "poll axis3_pos",
@@ -374,12 +374,12 @@
     "y": 240,
     "wires": [
       [
-        "9d457585adab41c5"
+        "4a509700b1da4f91"
       ]
     ]
   },
   {
-    "id": "9d457585adab41c5",
+    "id": "4a509700b1da4f91",
     "type": "OpcUa-Item",
     "z": "tab.live",
     "name": "axis3_pos",
@@ -390,12 +390,12 @@
     "y": 240,
     "wires": [
       [
-        "ddd4130862cf478e"
+        "bda16c3c23114b29"
       ]
     ]
   },
   {
-    "id": "ddd4130862cf478e",
+    "id": "bda16c3c23114b29",
     "type": "OpcUa-Client",
     "z": "tab.live",
     "endpoint": "opcua.endpoint",
@@ -414,12 +414,12 @@
     "y": 240,
     "wires": [
       [
-        "f4368eb7fb08459f"
+        "43b2b274f9d24049"
       ]
     ]
   },
   {
-    "id": "f4368eb7fb08459f",
+    "id": "43b2b274f9d24049",
     "type": "ui-gauge",
     "z": "tab.live",
     "group": "ui.grp.joints",
@@ -448,7 +448,7 @@
     "className": ""
   },
   {
-    "id": "44239e8319ad4284",
+    "id": "f9a059ad92db422c",
     "type": "inject",
     "z": "tab.live",
     "name": "poll axis4_pos",
@@ -472,12 +472,12 @@
     "y": 310,
     "wires": [
       [
-        "f69af6f2b5974c56"
+        "d50ab6dae2d24ea3"
       ]
     ]
   },
   {
-    "id": "f69af6f2b5974c56",
+    "id": "d50ab6dae2d24ea3",
     "type": "OpcUa-Item",
     "z": "tab.live",
     "name": "axis4_pos",
@@ -488,12 +488,12 @@
     "y": 310,
     "wires": [
       [
-        "d5e4e5cf0bb8449e"
+        "5f940a329af14eca"
       ]
     ]
   },
   {
-    "id": "d5e4e5cf0bb8449e",
+    "id": "5f940a329af14eca",
     "type": "OpcUa-Client",
     "z": "tab.live",
     "endpoint": "opcua.endpoint",
@@ -512,12 +512,12 @@
     "y": 310,
     "wires": [
       [
-        "f45c907a21764506"
+        "98305211fa67449d"
       ]
     ]
   },
   {
-    "id": "f45c907a21764506",
+    "id": "98305211fa67449d",
     "type": "ui-gauge",
     "z": "tab.live",
     "group": "ui.grp.joints",
@@ -546,7 +546,7 @@
     "className": ""
   },
   {
-    "id": "e5cec61ac6a64278",
+    "id": "d496042013654b97",
     "type": "inject",
     "z": "tab.live",
     "name": "poll axis5_pos",
@@ -570,12 +570,12 @@
     "y": 380,
     "wires": [
       [
-        "755d0623c4674a90"
+        "5b2da0a26d9742db"
       ]
     ]
   },
   {
-    "id": "755d0623c4674a90",
+    "id": "5b2da0a26d9742db",
     "type": "OpcUa-Item",
     "z": "tab.live",
     "name": "axis5_pos",
@@ -586,12 +586,12 @@
     "y": 380,
     "wires": [
       [
-        "1378284df58849ca"
+        "dfe8549a4751467b"
       ]
     ]
   },
   {
-    "id": "1378284df58849ca",
+    "id": "dfe8549a4751467b",
     "type": "OpcUa-Client",
     "z": "tab.live",
     "endpoint": "opcua.endpoint",
@@ -610,12 +610,12 @@
     "y": 380,
     "wires": [
       [
-        "f5fd3bbc137446f8"
+        "96533143393b414b"
       ]
     ]
   },
   {
-    "id": "f5fd3bbc137446f8",
+    "id": "96533143393b414b",
     "type": "ui-gauge",
     "z": "tab.live",
     "group": "ui.grp.joints",
@@ -644,7 +644,7 @@
     "className": ""
   },
   {
-    "id": "a898c07a5ae84639",
+    "id": "2fe4f371007c4f6b",
     "type": "inject",
     "z": "tab.live",
     "name": "poll axis6_pos",
@@ -668,12 +668,12 @@
     "y": 450,
     "wires": [
       [
-        "1337aeac8ede4984"
+        "1b1b819170944781"
       ]
     ]
   },
   {
-    "id": "1337aeac8ede4984",
+    "id": "1b1b819170944781",
     "type": "OpcUa-Item",
     "z": "tab.live",
     "name": "axis6_pos",
@@ -684,12 +684,12 @@
     "y": 450,
     "wires": [
       [
-        "1d6b01823f184898"
+        "0ac78f78aa4c4862"
       ]
     ]
   },
   {
-    "id": "1d6b01823f184898",
+    "id": "0ac78f78aa4c4862",
     "type": "OpcUa-Client",
     "z": "tab.live",
     "endpoint": "opcua.endpoint",
@@ -708,12 +708,12 @@
     "y": 450,
     "wires": [
       [
-        "1b3cf0c547d546bc"
+        "b7d1daeefae841cf"
       ]
     ]
   },
   {
-    "id": "1b3cf0c547d546bc",
+    "id": "b7d1daeefae841cf",
     "type": "ui-gauge",
     "z": "tab.live",
     "group": "ui.grp.joints",
@@ -742,7 +742,7 @@
     "className": ""
   },
   {
-    "id": "eecdd035d3444f6f",
+    "id": "f31ebdd5bfb64af9",
     "type": "function",
     "z": "tab.live",
     "name": "label motor temp series",
@@ -756,12 +756,12 @@
     "y": 600,
     "wires": [
       [
-        "8b7785af317541be"
+        "5ed6ec732c844853"
       ]
     ]
   },
   {
-    "id": "fd5030f249c54326",
+    "id": "7b41230ca1ce4dd4",
     "type": "inject",
     "z": "tab.live",
     "name": "poll axis1_motorT",
@@ -785,12 +785,12 @@
     "y": 600,
     "wires": [
       [
-        "ee83cd60286d4d89"
+        "334a522b71cf4225"
       ]
     ]
   },
   {
-    "id": "ee83cd60286d4d89",
+    "id": "334a522b71cf4225",
     "type": "OpcUa-Item",
     "z": "tab.live",
     "name": "axis1_motorT",
@@ -801,12 +801,12 @@
     "y": 600,
     "wires": [
       [
-        "6cad7933296f4e13"
+        "58e52b81180b4121"
       ]
     ]
   },
   {
-    "id": "6cad7933296f4e13",
+    "id": "58e52b81180b4121",
     "type": "OpcUa-Client",
     "z": "tab.live",
     "endpoint": "opcua.endpoint",
@@ -825,12 +825,12 @@
     "y": 600,
     "wires": [
       [
-        "eecdd035d3444f6f"
+        "f31ebdd5bfb64af9"
       ]
     ]
   },
   {
-    "id": "184d0f41cff24232",
+    "id": "235db08288fd4837",
     "type": "inject",
     "z": "tab.live",
     "name": "poll axis2_motorT",
@@ -854,12 +854,12 @@
     "y": 650,
     "wires": [
       [
-        "90e3a915ecc44244"
+        "dda8385c78a04fa9"
       ]
     ]
   },
   {
-    "id": "90e3a915ecc44244",
+    "id": "dda8385c78a04fa9",
     "type": "OpcUa-Item",
     "z": "tab.live",
     "name": "axis2_motorT",
@@ -870,12 +870,12 @@
     "y": 650,
     "wires": [
       [
-        "74ef276ac6bb4ba7"
+        "cf3ffa36a79a449f"
       ]
     ]
   },
   {
-    "id": "74ef276ac6bb4ba7",
+    "id": "cf3ffa36a79a449f",
     "type": "OpcUa-Client",
     "z": "tab.live",
     "endpoint": "opcua.endpoint",
@@ -894,12 +894,12 @@
     "y": 650,
     "wires": [
       [
-        "eecdd035d3444f6f"
+        "f31ebdd5bfb64af9"
       ]
     ]
   },
   {
-    "id": "7fc3e98ae79a4571",
+    "id": "edc91facb5f148c9",
     "type": "inject",
     "z": "tab.live",
     "name": "poll axis3_motorT",
@@ -923,12 +923,12 @@
     "y": 700,
     "wires": [
       [
-        "53b1da1c62064b76"
+        "627bc32e65c747de"
       ]
     ]
   },
   {
-    "id": "53b1da1c62064b76",
+    "id": "627bc32e65c747de",
     "type": "OpcUa-Item",
     "z": "tab.live",
     "name": "axis3_motorT",
@@ -939,12 +939,12 @@
     "y": 700,
     "wires": [
       [
-        "a2a191d90cc9471a"
+        "a06eef7eea904351"
       ]
     ]
   },
   {
-    "id": "a2a191d90cc9471a",
+    "id": "a06eef7eea904351",
     "type": "OpcUa-Client",
     "z": "tab.live",
     "endpoint": "opcua.endpoint",
@@ -963,12 +963,12 @@
     "y": 700,
     "wires": [
       [
-        "eecdd035d3444f6f"
+        "f31ebdd5bfb64af9"
       ]
     ]
   },
   {
-    "id": "8c1a482d6f4c484b",
+    "id": "deacce3376ad471f",
     "type": "inject",
     "z": "tab.live",
     "name": "poll axis4_motorT",
@@ -992,12 +992,12 @@
     "y": 750,
     "wires": [
       [
-        "5563e6c9103c4f85"
+        "eedd0aebd41b4ec2"
       ]
     ]
   },
   {
-    "id": "5563e6c9103c4f85",
+    "id": "eedd0aebd41b4ec2",
     "type": "OpcUa-Item",
     "z": "tab.live",
     "name": "axis4_motorT",
@@ -1008,12 +1008,12 @@
     "y": 750,
     "wires": [
       [
-        "796b227833014ae7"
+        "9b09f47b504343d0"
       ]
     ]
   },
   {
-    "id": "796b227833014ae7",
+    "id": "9b09f47b504343d0",
     "type": "OpcUa-Client",
     "z": "tab.live",
     "endpoint": "opcua.endpoint",
@@ -1032,12 +1032,12 @@
     "y": 750,
     "wires": [
       [
-        "eecdd035d3444f6f"
+        "f31ebdd5bfb64af9"
       ]
     ]
   },
   {
-    "id": "46d23bc8cf29438d",
+    "id": "9c9960bbe7f84980",
     "type": "inject",
     "z": "tab.live",
     "name": "poll axis5_motorT",
@@ -1061,12 +1061,12 @@
     "y": 800,
     "wires": [
       [
-        "138068293efc4f41"
+        "48bd80885e5541d2"
       ]
     ]
   },
   {
-    "id": "138068293efc4f41",
+    "id": "48bd80885e5541d2",
     "type": "OpcUa-Item",
     "z": "tab.live",
     "name": "axis5_motorT",
@@ -1077,12 +1077,12 @@
     "y": 800,
     "wires": [
       [
-        "c57d4fb0ffe34513"
+        "240e4c71dac7460a"
       ]
     ]
   },
   {
-    "id": "c57d4fb0ffe34513",
+    "id": "240e4c71dac7460a",
     "type": "OpcUa-Client",
     "z": "tab.live",
     "endpoint": "opcua.endpoint",
@@ -1101,12 +1101,12 @@
     "y": 800,
     "wires": [
       [
-        "eecdd035d3444f6f"
+        "f31ebdd5bfb64af9"
       ]
     ]
   },
   {
-    "id": "8010f4210d7a4e0f",
+    "id": "c8ae4d0424864e3f",
     "type": "inject",
     "z": "tab.live",
     "name": "poll axis6_motorT",
@@ -1130,12 +1130,12 @@
     "y": 850,
     "wires": [
       [
-        "78e03544f0d747a3"
+        "fd567c8117d446a2"
       ]
     ]
   },
   {
-    "id": "78e03544f0d747a3",
+    "id": "fd567c8117d446a2",
     "type": "OpcUa-Item",
     "z": "tab.live",
     "name": "axis6_motorT",
@@ -1146,12 +1146,12 @@
     "y": 850,
     "wires": [
       [
-        "cf99e3ef55b64965"
+        "355ca0bae6034308"
       ]
     ]
   },
   {
-    "id": "cf99e3ef55b64965",
+    "id": "355ca0bae6034308",
     "type": "OpcUa-Client",
     "z": "tab.live",
     "endpoint": "opcua.endpoint",
@@ -1170,12 +1170,12 @@
     "y": 850,
     "wires": [
       [
-        "eecdd035d3444f6f"
+        "f31ebdd5bfb64af9"
       ]
     ]
   },
   {
-    "id": "8b7785af317541be",
+    "id": "5ed6ec732c844853",
     "type": "ui-chart",
     "z": "tab.live",
     "group": "ui.grp.temps",
@@ -1211,7 +1211,7 @@
     "className": ""
   },
   {
-    "id": "cfbfe7017fbe4ead",
+    "id": "c4637bef31f846fa",
     "type": "inject",
     "z": "tab.live",
     "name": "poll ProgramState",
@@ -1235,12 +1235,12 @@
     "y": 1200,
     "wires": [
       [
-        "4d4f05dcea98482e"
+        "5f7328821edd45a2"
       ]
     ]
   },
   {
-    "id": "4d4f05dcea98482e",
+    "id": "5f7328821edd45a2",
     "type": "OpcUa-Item",
     "z": "tab.live",
     "name": "ProgramState",
@@ -1251,12 +1251,12 @@
     "y": 1200,
     "wires": [
       [
-        "dbcd9cd728db4e75"
+        "7c0981bcdcb74b5b"
       ]
     ]
   },
   {
-    "id": "dbcd9cd728db4e75",
+    "id": "7c0981bcdcb74b5b",
     "type": "OpcUa-Client",
     "z": "tab.live",
     "endpoint": "opcua.endpoint",
@@ -1275,12 +1275,12 @@
     "y": 1200,
     "wires": [
       [
-        "36a5313394ee4e18"
+        "50660a55ee214420"
       ]
     ]
   },
   {
-    "id": "36a5313394ee4e18",
+    "id": "50660a55ee214420",
     "type": "function",
     "z": "tab.live",
     "name": "ProgramState → label",
@@ -1290,12 +1290,12 @@
     "y": 1200,
     "wires": [
       [
-        "e7476e15fec04ed9"
+        "a71a50c59f344eb0"
       ]
     ]
   },
   {
-    "id": "e7476e15fec04ed9",
+    "id": "a71a50c59f344eb0",
     "type": "ui-text",
     "z": "tab.live",
     "group": "ui.grp.status",
@@ -1313,7 +1313,7 @@
     "height": 2
   },
   {
-    "id": "8778fb69ff5a4f38",
+    "id": "f8780a0f61a44933",
     "type": "inject",
     "z": "tab.live",
     "name": "poll CycleCounter",
@@ -1337,12 +1337,12 @@
     "y": 1280,
     "wires": [
       [
-        "8e922b7fd5ac479c"
+        "b04ffaa56a894d17"
       ]
     ]
   },
   {
-    "id": "8e922b7fd5ac479c",
+    "id": "b04ffaa56a894d17",
     "type": "OpcUa-Item",
     "z": "tab.live",
     "name": "CycleCounter",
@@ -1353,12 +1353,12 @@
     "y": 1280,
     "wires": [
       [
-        "5983a3ddd40a40fd"
+        "16ebe41628d643df"
       ]
     ]
   },
   {
-    "id": "5983a3ddd40a40fd",
+    "id": "16ebe41628d643df",
     "type": "OpcUa-Client",
     "z": "tab.live",
     "endpoint": "opcua.endpoint",
@@ -1377,12 +1377,12 @@
     "y": 1280,
     "wires": [
       [
-        "d95fc5fc6caf4e83"
+        "79c3d59b266d442e"
       ]
     ]
   },
   {
-    "id": "d95fc5fc6caf4e83",
+    "id": "79c3d59b266d442e",
     "type": "ui-text",
     "z": "tab.live",
     "group": "ui.grp.cycle",
@@ -1396,7 +1396,7 @@
     "height": 2
   },
   {
-    "id": "4c9e9ed3aa3b40ed",
+    "id": "e969e660077b4f24",
     "type": "inject",
     "z": "tab.live",
     "name": "poll ActiveRecommendation",
@@ -1420,12 +1420,12 @@
     "y": 1400,
     "wires": [
       [
-        "c3ae5169981743bb"
+        "d8dd3e0d4dbd4dd6"
       ]
     ]
   },
   {
-    "id": "c3ae5169981743bb",
+    "id": "d8dd3e0d4dbd4dd6",
     "type": "OpcUa-Item",
     "z": "tab.live",
     "name": "ActiveRecommendation",
@@ -1436,12 +1436,12 @@
     "y": 1400,
     "wires": [
       [
-        "c382af909b004e30"
+        "bb2303e1859442cb"
       ]
     ]
   },
   {
-    "id": "c382af909b004e30",
+    "id": "bb2303e1859442cb",
     "type": "OpcUa-Client",
     "z": "tab.live",
     "endpoint": "opcua.endpoint",
@@ -1460,12 +1460,12 @@
     "y": 1400,
     "wires": [
       [
-        "da4982eefe444261"
+        "c720e472b02f430b"
       ]
     ]
   },
   {
-    "id": "da4982eefe444261",
+    "id": "c720e472b02f430b",
     "type": "ui-text",
     "z": "tab.live",
     "group": "ui.grp.reco",
@@ -1479,7 +1479,7 @@
     "height": 8
   },
   {
-    "id": "cc543328f38b4bdc",
+    "id": "31c4aba0190a4a9e",
     "type": "ui-button",
     "z": "tab.live",
     "group": "ui.grp.approve",
@@ -1497,12 +1497,12 @@
     "height": 2,
     "wires": [
       [
-        "da7296ee46fc46d3"
+        "63f31b34358e4436"
       ]
     ]
   },
   {
-    "id": "85a791de8cfb454e",
+    "id": "f11064078ebb42fb",
     "type": "ui-button",
     "z": "tab.live",
     "group": "ui.grp.approve",
@@ -1520,12 +1520,12 @@
     "height": 2,
     "wires": [
       [
-        "8262c603bb0141b8"
+        "633ca6a91e80462b"
       ]
     ]
   },
   {
-    "id": "da7296ee46fc46d3",
+    "id": "63f31b34358e4436",
     "type": "function",
     "z": "tab.live",
     "name": "build approve method args",
@@ -1535,12 +1535,12 @@
     "y": 1500,
     "wires": [
       [
-        "2ff9f8b1039a4743"
+        "2c8135d8b9424020"
       ]
     ]
   },
   {
-    "id": "8262c603bb0141b8",
+    "id": "633ca6a91e80462b",
     "type": "function",
     "z": "tab.live",
     "name": "build reject method args",
@@ -1550,12 +1550,12 @@
     "y": 1560,
     "wires": [
       [
-        "5c895267eb5e4c16"
+        "218d7d18a2cc4952"
       ]
     ]
   },
   {
-    "id": "2ff9f8b1039a4743",
+    "id": "2c8135d8b9424020",
     "type": "OpcUa-Client",
     "z": "tab.live",
     "endpoint": "opcua.endpoint",
@@ -1577,7 +1577,7 @@
     ]
   },
   {
-    "id": "5c895267eb5e4c16",
+    "id": "218d7d18a2cc4952",
     "type": "OpcUa-Client",
     "z": "tab.live",
     "endpoint": "opcua.endpoint",

@@ -94,7 +94,7 @@ def main() -> None:
         "id": DASH,
         "type": "ui-base",
         "name": "Robot Twin",
-        "path": "/nodered/ui",
+        "path": "/dashboard",
         "appIcon": "",
         "showPathInSidebar": False,
         "showPageTitle": True,

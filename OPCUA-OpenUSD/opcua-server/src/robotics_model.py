@@ -55,6 +55,12 @@ class AddressSpace:
     anomaly_injected: object = None  # variable, set by InjectAnomaly method
 
 
+def _nid(ns: int, path: str) -> ua.NodeId:
+    """Stable string NodeId so external clients (Node-RED, Telegraf) can
+    address nodes by name instead of relying on auto-allocated numeric IDs."""
+    return ua.NodeId(path, ns, ua.NodeIdType.String)
+
+
 async def build_address_space(server: Server) -> AddressSpace:
     ns_primary = await server.register_namespace(NS_PRIMARY)
     ns_reco = await server.register_namespace(NS_RECOMMENDATIONS)
@@ -62,57 +68,101 @@ async def build_address_space(server: Server) -> AddressSpace:
     objects = server.nodes.objects
 
     # ─────────── RobotController ───────────
-    controller = await objects.add_object(ns_primary, "RobotController")
+    controller = await objects.add_object(_nid(ns_primary, "RobotController"), "RobotController")
 
-    ident = await controller.add_object(ns_primary, "Identification")
-    await ident.add_variable(ns_primary, "Manufacturer", "Axel Demo Robotics")
-    await ident.add_variable(ns_primary, "Model", "Demo6Axis-1")
-    await ident.add_variable(ns_primary, "SerialNumber", "POC-001")
+    ident = await controller.add_object(
+        _nid(ns_primary, "RobotController.Identification"), "Identification"
+    )
+    await ident.add_variable(
+        _nid(ns_primary, "RobotController.Identification.Manufacturer"),
+        "Manufacturer", "Axel Demo Robotics",
+    )
+    await ident.add_variable(
+        _nid(ns_primary, "RobotController.Identification.Model"),
+        "Model", "Demo6Axis-1",
+    )
+    await ident.add_variable(
+        _nid(ns_primary, "RobotController.Identification.SerialNumber"),
+        "SerialNumber", "POC-001",
+    )
 
-    motion = await controller.add_object(ns_primary, "MotionDevice")
+    motion = await controller.add_object(
+        _nid(ns_primary, "RobotController.MotionDevice"), "MotionDevice"
+    )
     axes: dict[int, AxisNodes] = {}
     for i in range(1, 7):
-        axis = await motion.add_object(ns_primary, f"Axis{i}")
-        ap = await axis.add_variable(ns_primary, "ActualPosition", 0.0, ua.VariantType.Double)
+        ax_path = f"RobotController.MotionDevice.Axis{i}"
+        axis = await motion.add_object(_nid(ns_primary, ax_path), f"Axis{i}")
+        ap = await axis.add_variable(
+            _nid(ns_primary, f"{ax_path}.ActualPosition"),
+            "ActualPosition", 0.0, ua.VariantType.Double,
+        )
         await ap.set_writable(False)
-        sp = await axis.add_variable(ns_primary, "ActualSpeed", 0.0, ua.VariantType.Double)
+        sp = await axis.add_variable(
+            _nid(ns_primary, f"{ax_path}.ActualSpeed"),
+            "ActualSpeed", 0.0, ua.VariantType.Double,
+        )
         await sp.set_writable(False)
-        at = await axis.add_variable(ns_primary, "ActualTemperature", 25.0, ua.VariantType.Double)
+        at = await axis.add_variable(
+            _nid(ns_primary, f"{ax_path}.ActualTemperature"),
+            "ActualTemperature", 25.0, ua.VariantType.Double,
+        )
         await at.set_writable(False)
-        mt = await axis.add_variable(ns_primary, "MotorTemperature", 28.0, ua.VariantType.Double)
+        mt = await axis.add_variable(
+            _nid(ns_primary, f"{ax_path}.MotorTemperature"),
+            "MotorTemperature", 28.0, ua.VariantType.Double,
+        )
         await mt.set_writable(False)
         axes[i] = AxisNodes(ap, sp, at, mt)
 
-    tool = await controller.add_object(ns_primary, "Tool")
-    gripper = await tool.add_variable(ns_primary, "GripperState", False, ua.VariantType.Boolean)
+    tool = await controller.add_object(
+        _nid(ns_primary, "RobotController.Tool"), "Tool"
+    )
+    gripper = await tool.add_variable(
+        _nid(ns_primary, "RobotController.Tool.GripperState"),
+        "GripperState", False, ua.VariantType.Boolean,
+    )
     await gripper.set_writable(False)
-    payload = await tool.add_variable(ns_primary, "PayloadKg", 0.0, ua.VariantType.Double)
+    payload = await tool.add_variable(
+        _nid(ns_primary, "RobotController.Tool.PayloadKg"),
+        "PayloadKg", 0.0, ua.VariantType.Double,
+    )
     await payload.set_writable(False)
 
     program_state = await controller.add_variable(
-        ns_primary, "ProgramState", 0, ua.VariantType.Int32
+        _nid(ns_primary, "RobotController.ProgramState"),
+        "ProgramState", 0, ua.VariantType.Int32,
     )
-    await program_state.set_writable(True)  # operator/agent can flip this on approval
+    await program_state.set_writable(True)
 
     cycle_counter = await controller.add_variable(
-        ns_primary, "CycleCounter", 0, ua.VariantType.UInt64
+        _nid(ns_primary, "RobotController.CycleCounter"),
+        "CycleCounter", 0, ua.VariantType.UInt64,
     )
     await cycle_counter.set_writable(False)
 
-    task_control = await controller.add_object(ns_primary, "TaskControl")
+    task_control = await controller.add_object(
+        _nid(ns_primary, "RobotController.TaskControl"), "TaskControl"
+    )
 
     @uamethod
     async def reset_maintenance(parent):  # noqa: ARG001
-        await program_state.write_value(0)  # back to Idle
+        await program_state.write_value(
+            ua.Variant(0, ua.VariantType.Int32)
+        )  # back to Idle
         return ua.StatusCode(ua.StatusCodes.Good)
 
     await task_control.add_method(
-        ns_primary, "ResetMaintenance", reset_maintenance, [], [ua.VariantType.StatusCode]
+        _nid(ns_primary, "RobotController.TaskControl.ResetMaintenance"),
+        "ResetMaintenance",
+        reset_maintenance,
+        [],
+        [ua.VariantType.StatusCode],
     )
 
-    # InjectAnomaly method (so a Node-RED button or curl can trigger demo).
     anomaly_var = await controller.add_variable(
-        ns_primary, "InjectedAnomaly", "", ua.VariantType.String
+        _nid(ns_primary, "RobotController.InjectedAnomaly"),
+        "InjectedAnomaly", "", ua.VariantType.String,
     )
     await anomaly_var.set_writable(False)
 
@@ -122,7 +172,7 @@ async def build_address_space(server: Server) -> AddressSpace:
         return ua.StatusCode(ua.StatusCodes.Good)
 
     await task_control.add_method(
-        ns_primary,
+        _nid(ns_primary, "RobotController.TaskControl.InjectAnomaly"),
         "InjectAnomaly",
         inject_anomaly_method,
         [ua.VariantType.String],
@@ -130,15 +180,19 @@ async def build_address_space(server: Server) -> AddressSpace:
     )
 
     # ─────────── RobotRecommendations ───────────
-    reco_obj = await objects.add_object(ns_reco, "RobotRecommendations")
+    reco_obj = await objects.add_object(
+        _nid(ns_reco, "RobotRecommendations"), "RobotRecommendations"
+    )
 
     active_reco = await reco_obj.add_variable(
-        ns_reco, "ActiveRecommendation", "", ua.VariantType.String
+        _nid(ns_reco, "RobotRecommendations.ActiveRecommendation"),
+        "ActiveRecommendation", "", ua.VariantType.String,
     )
-    await active_reco.set_writable(True)  # the agent writes here
+    await active_reco.set_writable(True)
 
     reco_count = await reco_obj.add_variable(
-        ns_reco, "RecommendationCount", 0, ua.VariantType.UInt32
+        _nid(ns_reco, "RobotRecommendations.RecommendationCount"),
+        "RecommendationCount", 0, ua.VariantType.UInt32,
     )
     await reco_count.set_writable(True)
 
@@ -162,7 +216,7 @@ async def build_address_space(server: Server) -> AddressSpace:
         return ua.StatusCode(ua.StatusCodes.Good)
 
     await reco_obj.add_method(
-        ns_reco,
+        _nid(ns_reco, "RobotRecommendations.ApproveRecommendation"),
         "ApproveRecommendation",
         approve_recommendation,
         [ua.VariantType.String, ua.VariantType.Boolean],
