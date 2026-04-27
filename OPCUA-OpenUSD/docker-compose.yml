@@ -55,8 +55,8 @@ services:
         condition: service_healthy
     networks:
       - stack
-    volumes:
-      - nodered-data:/data
+    # No /data volume on purpose — flows.json + settings.js are baked
+    # into the image so the dashboard is reproducible across rebuilds.
 
 networks:
   stack:
@@ -65,4 +65,3 @@ networks:
 
 volumes:
   opcua-certs:
-  nodered-data:
