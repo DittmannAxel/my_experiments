@@ -31,7 +31,25 @@ services:
     networks:
       - stack
 
+  opcua-server:
+    build: ./opcua-server
+    container_name: rt-opcua
+    restart: unless-stopped
+    environment:
+      - OPCUA_USER=${OPCUA_USER:-axel}
+      - OPCUA_PASSWORD=${OPCUA_PASSWORD:-changeme-please}
+      - INJECT_ANOMALY=${INJECT_ANOMALY:-}
+    ports:
+      - "4840:4840"
+    volumes:
+      - opcua-certs:/app/certs
+    networks:
+      - stack
+
 networks:
   stack:
     name: stack
     driver: bridge
+
+volumes:
+  opcua-certs:
