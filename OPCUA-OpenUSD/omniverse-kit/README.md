@@ -11,7 +11,7 @@ careful GPU coordination with bare-metal vLLM.
 
 ## What's needed
 
-Two paths from BUILD.md, in order of preference:
+Two paths, in order of preference:
 
 ### Path A — NVIDIA Kit App Template (preferred)
 
@@ -23,7 +23,7 @@ Two paths from BUILD.md, in order of preference:
    - Set the viewport camera to a fixed industrial-cell view of the robot.
    - File-watch `live.usda` so bridge writes reflect without manual reload —
      `omni.client.live_set_default_enabled(True)` or a `Sdf.Layer.Reload()`
-     timer (BUILD.md Trap 3).
+     timer if the file-watcher proves unreliable.
 4. Containerize via the template's Dockerfile (NVIDIA base image + nvidia
    runtime). Mount the `usd-stage` volume at `/stage:ro`.
 5. Expose port 8443 for the streaming signaling (HTTP + WebSocket) plus the

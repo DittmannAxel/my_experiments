@@ -13,8 +13,6 @@ A containerized Industry-4.0 demo on a single GPU host that wires:
 
 All services are reverse-proxied by Traefik with one self-signed wildcard cert.
 
-See [BUILD.md](BUILD.md) for the full build specification.
-
 ## Quick start
 
 ```bash
@@ -51,8 +49,8 @@ Mac's `/etc/hosts`, where `<HOST_IP>` is the LAN address of the GPU host).
   configurable via `VLLM_MODEL` in `.env`); the agent + RAG-MCP reach it via
   `host.docker.internal:8000` from inside the compose network
 
-Containers reach vLLM via `http://host.docker.internal:8000/v1`
-(BUILD.md Trap 1: `extra_hosts: host-gateway`).
+Containers reach vLLM via `http://host.docker.internal:8000/v1` (the
+`extra_hosts: host-gateway` pattern, required on Linux Docker).
 
 ## Phase status
 
@@ -74,10 +72,10 @@ on the host. Reproduce with `./scripts/demo-anomaly.sh`.
 
 ## GPU split
 
-vLLM currently uses **both** GPUs (`--tensor-parallel-size 2`,
-`--gpu-memory-utilization 0.93`). When Phase 4 (Omniverse Kit) is brought up,
-vLLM must be stopped first to free GPU 1; the agent and RAG-MCP then talk to a
-restarted vLLM single-GPU on GPU 0. See BUILD.md Trap 5.
+If vLLM uses both GPUs (tensor-parallel) it must be stopped before Omniverse
+Kit can claim GPU 1. Restart vLLM with `--tensor-parallel-size 1` and
+`CUDA_VISIBLE_DEVICES=0`; the agent and RAG-MCP keep working alongside the
+viewer. A reference launcher is at `scripts/launch_vllm_nemotron_gpu0.sh`.
 
 ## Layout
 
