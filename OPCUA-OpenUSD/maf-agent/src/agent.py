@@ -87,9 +87,9 @@ def _get_agent() -> Agent:
     global _chat_client, _agent
     if _agent is None:
         _chat_client = OpenAIChatClient(
+            model=VLLM_MODEL,
             api_key="not-used",
             base_url=VLLM_BASE_URL,
-            model_id=VLLM_MODEL,
         )
         _agent = Agent(
             name="robot-twin-agent",
