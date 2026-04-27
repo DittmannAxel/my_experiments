@@ -165,16 +165,29 @@ performance / alerts row, the spec chat, and the HITL recommendation card.
 The agent (service `maf-agent`) is built on the
 [Microsoft Agent Framework](https://github.com/microsoft/agent-framework)
 (GA, `agent-framework` 1.2.0). It uses `agent_framework.Agent` with the
-`OpenAIChatClient` pointed at the bare-metal vLLM. vLLM serves
-**`nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-FP8`** by default — a 30 B-parameter
-Mamba2 + Transformer hybrid MoE that activates only ~3.5 B parameters per
-token, fits in ~17 GB FP8 on a single RTX 6000 Ada, and ships native tool
-calling (BFCL v4 ≈ 53). Launch flags:
-`--tool-call-parser qwen3_coder --reasoning-parser nano_v3
---reasoning-parser-plugin scripts/nano_v3_reasoning_parser.py
---kv-cache-dtype fp8 --trust-remote-code`. The thinking trace is
-toggled per request via `chat_template_kwargs.enable_thinking=False` so
-the recommendation arrives as a single fast tool call.
+**`OpenAIChatCompletionClient`** (the stateless `chat.completions` variant —
+vLLM doesn't persist OpenAI's stateful `response_id`s) pointed at the
+bare-metal vLLM.
+
+vLLM serves **`nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-FP8`** by default — a
+30 B-parameter Mamba2 + Transformer hybrid MoE that activates only ~3.5 B
+parameters per token, fits on GPU 0 (~41 GB used incl. KV cache) on a single
+RTX 6000 Ada, and ships native tool calling (BFCL v4 ≈ 53, MMLU-Pro 78,
+AIME25-with-tools 99). Launch flags:
+
+```
+--tool-call-parser qwen3_coder
+--reasoning-parser nano_v3 --reasoning-parser-plugin scripts/nano_v3_reasoning_parser.py
+--kv-cache-dtype fp8
+--trust-remote-code
+```
+
+The thinking trace is toggled per request via
+`chat_template_kwargs.enable_thinking=False` so the recommendation arrives as
+a single fast tool call. A reference launcher lives at
+[`scripts/launch_vllm_nemotron3_gpu0.sh`](scripts/launch_vllm_nemotron3_gpu0.sh)
+and the parser plugin (vendored from the model card) at
+[`scripts/nano_v3_reasoning_parser.py`](scripts/nano_v3_reasoning_parser.py).
 
 Two `@tool` functions:
 
@@ -248,9 +261,10 @@ OPCUA-OpenUSD/
 ├── grafana/provisioning/       # datasource + dashboard
 ├── pgvector/                   # pgvector pg16 + init.sql
 ├── rag-mcp/                    # FastAPI + sentence-transformers + spec query
-├── maf-agent/                  # advisory agent (OpenAI tool calling, see note)
+├── maf-agent/                  # advisory agent (Microsoft Agent Framework)
 ├── omniverse-kit/              # Phase 4: Kit App + WebRTC streaming
 ├── docs/                       # screenshots, diagrams (drop-in)
 └── scripts/                    # gen-certs, healthcheck, demo-anomaly,
-                                # launch_vllm_nemotron_gpu0
+                                # launch_vllm_nemotron3_gpu0,
+                                # nano_v3_reasoning_parser
 ```
