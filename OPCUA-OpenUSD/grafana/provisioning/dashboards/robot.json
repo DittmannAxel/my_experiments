@@ -1,0 +1,153 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Axis Positions (deg)",
+      "id": 1,
+      "gridPos": {"h": 9, "w": 24, "x": 0, "y": 0},
+      "datasource": {"type": "influxdb", "uid": "InfluxDB"},
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"robot\")\n  |> range(start: -15m)\n  |> filter(fn: (r) => r._measurement == \"axis\" and r.metric == \"position\")\n  |> filter(fn: (r) => r._field == \"axis1_pos\" or r._field == \"axis2_pos\" or r._field == \"axis3_pos\" or r._field == \"axis4_pos\" or r._field == \"axis5_pos\" or r._field == \"axis6_pos\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"position\")"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "degree",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "showPoints": "never",
+            "lineWidth": 2,
+            "fillOpacity": 5
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {"displayMode": "list", "placement": "bottom", "showLegend": true},
+        "tooltip": {"mode": "multi", "sort": "desc"}
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Motor Temperatures (°C) — threshold 90°C",
+      "id": 2,
+      "gridPos": {"h": 9, "w": 18, "x": 0, "y": 9},
+      "datasource": {"type": "influxdb", "uid": "InfluxDB"},
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"robot\")\n  |> range(start: -15m)\n  |> filter(fn: (r) => r._measurement == \"axis\" and r.metric == \"motor_temp\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"motor_temp\")"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 70},
+              {"color": "red",    "value": 90}
+            ]
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "showPoints": "never",
+            "lineWidth": 2,
+            "fillOpacity": 5,
+            "thresholdsStyle": {"mode": "line"}
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {"displayMode": "list", "placement": "bottom", "showLegend": true},
+        "tooltip": {"mode": "multi"}
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Cycle Counter",
+      "id": 3,
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 9},
+      "datasource": {"type": "influxdb", "uid": "InfluxDB"},
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"robot\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"scalar\" and r._field == \"cycle_counter\")\n  |> last()"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "decimals": 0,
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
+        }
+      },
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      }
+    },
+    {
+      "type": "stat",
+      "title": "ProgramState",
+      "id": 4,
+      "gridPos": {"h": 5, "w": 6, "x": 18, "y": 13},
+      "datasource": {"type": "influxdb", "uid": "InfluxDB"},
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"robot\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"scalar\" and r._field == \"program_state\")\n  |> last()"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {"type": "value", "options": {"0": {"text": "Idle", "color": "blue"}}},
+            {"type": "value", "options": {"1": {"text": "Starting", "color": "yellow"}}},
+            {"type": "value", "options": {"2": {"text": "Running", "color": "green"}}},
+            {"type": "value", "options": {"3": {"text": "Stopping", "color": "yellow"}}},
+            {"type": "value", "options": {"4": {"text": "Stopped", "color": "orange"}}},
+            {"type": "value", "options": {"5": {"text": "Aborted", "color": "red"}}},
+            {"type": "value", "options": {"6": {"text": "MaintenanceRequired", "color": "red"}}}
+          ],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
+        }
+      },
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "center"
+      }
+    }
+  ],
+  "preload": false,
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "tags": ["robot-twin"],
+  "templating": {"list": []},
+  "time": {"from": "now-15m", "to": "now"},
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Robot Twin",
+  "uid": "robot-twin",
+  "version": 1,
+  "weekStart": ""
+}

@@ -30,11 +30,12 @@ http:
       tls: {}
 
     # ──────────── Phase 3: Grafana ────────────
-    # grafana:
-    #   rule: "Host(`stack.local`) && PathPrefix(`/grafana`)"
-    #   service: grafana
-    #   entryPoints: [websecure]
-    #   tls: {}
+    grafana:
+      rule: "Host(`stack.local`) && PathPrefix(`/grafana`)"
+      service: grafana
+      priority: 100
+      entryPoints: [websecure]
+      tls: {}
 
     # ──────────── Phase 4: Omniverse Kit ────────────
     # usd:
@@ -60,10 +61,10 @@ http:
       loadBalancer:
         servers:
           - url: "http://opcua-nodered:1880"
-    # grafana:
-    #   loadBalancer:
-    #     servers:
-    #       - url: "http://grafana:3000"
+    grafana:
+      loadBalancer:
+        servers:
+          - url: "http://grafana:3000"
     # usd:
     #   loadBalancer:
     #     servers:
