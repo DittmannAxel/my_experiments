@@ -304,6 +304,90 @@ function basePath() {
 document.getElementById("inject-btn").addEventListener("click", async () => {
   await fetch(`${basePath()}/api/inject-anomaly`, { method: "POST" });
 });
+
+// ─────── Ask the Spec ───────
+const askThread = document.getElementById("ask-thread");
+const askForm = document.getElementById("ask-form");
+const askInput = document.getElementById("ask-input");
+const askBtn = document.getElementById("ask-btn");
+
+function renderQuestion(q) {
+  return el("div", { className: "ask-msg-q" }, [q]);
+}
+function renderAnswer(text, citations) {
+  const a = el("div", { className: "ask-msg-a" }, [text]);
+  if (citations && citations.length) {
+    const wrap = el("div", { className: "ask-cites" });
+    citations.forEach(c => {
+      const cite = el("div", { className: "ask-cite" });
+      const tag = el("strong", null, [`[${c.part}#${(c.chunk_id || "").slice(0, 8)}]`]);
+      cite.appendChild(tag);
+      cite.appendChild(document.createTextNode(" " + (c.snippet || "").slice(0, 220)));
+      wrap.appendChild(cite);
+    });
+    a.appendChild(wrap);
+  }
+  return a;
+}
+
+async function askSpec(question) {
+  if (!question || !question.trim()) return;
+  const q = question.trim();
+  // Drop the empty hint on first ask.
+  const empty = askThread.querySelector(".ask-empty");
+  if (empty) empty.remove();
+
+  askThread.appendChild(renderQuestion(q));
+  const aHolder = renderAnswer("…thinking", []);
+  aHolder.querySelector(".ask-msg-a, .ask-msg-a")?.classList.add("pending");
+  aHolder.firstChild.nodeValue = "";
+  const pending = el("span", { className: "pending" }, ["…thinking"]);
+  aHolder.insertBefore(pending, aHolder.firstChild);
+  askThread.appendChild(aHolder);
+  askThread.scrollTop = askThread.scrollHeight;
+
+  askBtn.disabled = true;
+  askInput.disabled = true;
+  try {
+    const r = await fetch("/spec/api/specification/query", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question: q, k: 4 }),
+    });
+    const d = await r.json();
+    aHolder.replaceChildren();
+    aHolder.appendChild(document.createTextNode(d.answer || "(no answer)"));
+    if (d.citations && d.citations.length) {
+      const wrap = el("div", { className: "ask-cites" });
+      d.citations.forEach(c => {
+        const cite = el("div", { className: "ask-cite" });
+        cite.appendChild(el("strong", null, [`[${c.part}#${(c.chunk_id || "").slice(0, 8)}]`]));
+        cite.appendChild(document.createTextNode(" " + (c.snippet || "").slice(0, 220)));
+        wrap.appendChild(cite);
+      });
+      aHolder.appendChild(wrap);
+    }
+  } catch (e) {
+    aHolder.replaceChildren(document.createTextNode(`Error: ${e}`));
+  } finally {
+    askBtn.disabled = false;
+    askInput.disabled = false;
+    askInput.value = "";
+    askInput.focus();
+    askThread.scrollTop = askThread.scrollHeight;
+  }
+}
+
+askForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  askSpec(askInput.value);
+});
+
+// Click the example chips to auto-submit them.
+askThread.addEventListener("click", (e) => {
+  const t = e.target;
+  if (t && t.tagName === "EM") askSpec(t.textContent.replace(/^"|"$/g, ""));
+});
 document.getElementById("approve-btn").addEventListener("click", async () => {
   await fetch(`${basePath()}/api/approve?approved=true`, { method: "POST" });
 });

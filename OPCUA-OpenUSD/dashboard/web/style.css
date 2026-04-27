@@ -280,6 +280,87 @@ html, body {
 .alerts-row { padding-top: 4px; }
 .alerts-state { font-size: 18px; font-weight: 700; color: var(--green); }
 
+/* ────────── Ask the Spec ────────── */
+.ask-card { border-left: 3px solid var(--primary); }
+.ask-body { display: flex; flex-direction: column; gap: 12px; }
+.ask-thread {
+  max-height: 280px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-right: 6px;
+}
+.ask-empty {
+  font-size: 12px;
+  color: var(--muted);
+  font-style: normal;
+  line-height: 1.7;
+}
+.ask-empty em {
+  display: inline-block;
+  background: var(--card-2);
+  border: 1px solid var(--border);
+  padding: 2px 8px;
+  border-radius: 6px;
+  margin: 0 2px;
+  cursor: pointer;
+  font-style: normal;
+}
+.ask-empty em:hover { border-color: var(--primary); color: var(--primary); }
+.ask-msg-q {
+  background: var(--card-2);
+  border-left: 3px solid var(--primary);
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+.ask-msg-a {
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+.ask-msg-a .pending {
+  color: var(--muted);
+  font-style: italic;
+}
+.ask-cites {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ask-cite {
+  background: var(--card-2);
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.ask-cite strong { color: var(--primary); font-weight: 600; }
+.ask-form {
+  display: flex;
+  gap: 8px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+.ask-form input {
+  flex: 1;
+  background: var(--card-2);
+  border: 1px solid var(--border);
+  color: var(--fg);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+}
+.ask-form input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
 .reco-card { border-left: 3px solid var(--yellow); }
 .reco-title { font-size: 16px; font-weight: 600; }
 .reco-cite { font-size: 11px; margin: 4px 0 8px; }

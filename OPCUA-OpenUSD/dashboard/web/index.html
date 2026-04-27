@@ -142,6 +142,29 @@
         </div>
       </section>
 
+      <!-- Ask the Spec — chat with the OPC UA RAG -->
+      <section class="row">
+        <div class="card flex-1 ask-card">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2zm2-7.5c-1.4 1.2-2 1.9-2 3v.5h-2v-.6c0-1.6.8-2.5 2.2-3.6.6-.5.8-.9.8-1.4a1 1 0 00-1-1c-.6 0-1 .4-1 1H10a3 3 0 116 0c0 1-.5 1.7-1 2.1z"/></svg>
+            ASK THE SPEC <span class="muted">(OPC UA RAG · Nemotron Nano 8B)</span>
+          </div>
+          <div class="ask-body">
+            <div class="ask-thread" id="ask-thread">
+              <div class="ask-empty">
+                Try: <em>"How do I model a maintenance state in OPC UA Robotics?"</em>
+                · <em>"What's the standard way to signal axis over-temperature?"</em>
+                · <em>"Difference between Alarm and Condition?"</em>
+              </div>
+            </div>
+            <form class="ask-form" id="ask-form">
+              <input id="ask-input" type="text" placeholder="Ask a question about the OPC UA specification…" autocomplete="off"/>
+              <button type="submit" class="btn btn-ok" id="ask-btn">Ask</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
       <!-- Recommendation panel (visible when active) -->
       <section class="row" id="reco-row" style="display:none">
         <div class="card flex-1 reco-card">
