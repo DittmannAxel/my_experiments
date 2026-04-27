@@ -60,10 +60,16 @@ async def writer_loop(snap: Snapshot, writer: UsdWriter):
             )
             write_count += 1
             now = time.monotonic()
-            if now - last_log_ts > 30.0:
+            if now - last_log_ts > 15.0:
                 log.info(
-                    "writer_loop alive: %d writes in last %.1fs, ps=%s",
+                    "writer_loop alive: %d writes / %.0fs ps=%s a1=%.2f a2=%.2f a3=%.2f a4=%.2f a5=%.2f a6=%.2f",
                     write_count, now - last_log_ts, snap.program_state,
+                    snap.joint_angles_deg.get(1, -999),
+                    snap.joint_angles_deg.get(2, -999),
+                    snap.joint_angles_deg.get(3, -999),
+                    snap.joint_angles_deg.get(4, -999),
+                    snap.joint_angles_deg.get(5, -999),
+                    snap.joint_angles_deg.get(6, -999),
                 )
                 last_log_ts = now
                 write_count = 0
