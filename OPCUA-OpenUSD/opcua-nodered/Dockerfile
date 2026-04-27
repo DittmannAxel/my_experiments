@@ -18,4 +18,4 @@ ENV NODE_RED_ENABLE_PROJECTS=false
 EXPOSE 1880
 
 HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=5 \
-  CMD wget -qO /dev/null http://localhost:1880/nodered/ || exit 1
+  CMD curl -fsS http://localhost:1880/nodered/ -o /dev/null || exit 1
