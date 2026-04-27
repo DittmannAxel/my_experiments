@@ -6,7 +6,7 @@ import shutil
 import time
 from pathlib import Path
 
-from pxr import Sdf, Usd, UsdGeom, Vt
+from pxr import Gf, Sdf, Vt
 
 log = logging.getLogger("usd_writer")
 
@@ -97,25 +97,23 @@ class UsdWriter:
 
     def _set_joint_rotation(self, axis: int, deg: float) -> None:
         prim_path = Sdf.Path(joint_prim_path(axis))
+        self._ensure_over_chain(prim_path)
         spec = self.layer.GetPrimAtPath(prim_path)
-        if spec is None:
-            spec = Sdf.PrimSpec(self.layer, prim_path.name, Sdf.SpecifierOver)
-            # Walk parents and create each over.
-            self._ensure_over_chain(prim_path)
-            spec = self.layer.GetPrimAtPath(prim_path)
 
         attr_name = "xformOp:rotateXYZ"
-        attr_spec = self.layer.GetAttributeAtPath(prim_path.AppendProperty(attr_name))
+        attr_path = prim_path.AppendProperty(attr_name)
+        attr_spec = self.layer.GetAttributeAtPath(attr_path)
         if attr_spec is None:
             attr_spec = Sdf.AttributeSpec(
                 spec, attr_name, Sdf.ValueTypeNames.Float3
             )
-        # Build (rx, ry, rz) tuple based on which axis this joint rotates around.
         rot = [0.0, 0.0, 0.0]
         rot[ROT_AXIS_INDEX[axis]] = float(deg)
-        attr_spec.default = Vt.Vec3fArray(1, [tuple(rot)])[0] if False else (
-            rot[0], rot[1], rot[2]
-        )
+        # Use Gf.Vec3f explicitly. Previously assigned a plain Python tuple
+        # which Sdf accepted on first write but then refused to mutate on
+        # subsequent writes for the same attr_spec — the layer's default
+        # would stay frozen at the first value.
+        attr_spec.default = Gf.Vec3f(rot[0], rot[1], rot[2])
 
     def _set_link_color(self, axis: int, temp_c: float) -> None:
         prim_path = Sdf.Path(link_prim_path(axis))
