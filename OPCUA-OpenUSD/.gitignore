@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.eggs/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Editors / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Generated certs (never commit)
+traefik/certs/
+opcua-server/certs/
+**/.opcua-cache/
+
+# USD volume artifacts during local dev
+usd-stage/
+*.usdc
+
+# Docker / env
+.env
+.env.local
+
+# Omniverse Kit upstream — pulled in via build
+omniverse-kit/upstream/
+
+# Submodule build artifacts
+rag-mcp/ua-spec-source/.git

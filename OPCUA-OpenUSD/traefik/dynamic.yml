@@ -1,0 +1,9 @@
+tls:
+  certificates:
+    - certFile: /etc/traefik/certs/stack.local.crt
+      keyFile: /etc/traefik/certs/stack.local.key
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /etc/traefik/certs/stack.local.crt
+        keyFile: /etc/traefik/certs/stack.local.key
