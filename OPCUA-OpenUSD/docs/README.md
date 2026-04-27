@@ -1,18 +1,24 @@
 # docs/
 
-Static assets for the top-level `OPCUA-OpenUSD/README.md` — screenshots,
-diagrams exported as PNG, and any other binary visuals.
+Static assets for the top-level `OPCUA-OpenUSD/README.md`.
 
-## Expected files
+## Files
 
-- `dashboard.png` — full-window screenshot of the Robotics Dashboard
-  (`https://stack.local/dashboard/`) showing the live gauges, motor-temperature
-  chart, system-health ring, and the HITL approval panel. Drop the file in
-  manually; the README references it as `docs/dashboard.png`.
+- `architecture.png` — system architecture diagram. Drop in manually. Hero image
+  in the main README.
+- `dashboard-hero.jpg` — Robotics Dashboard with live gauges, joint summary,
+  and motor-temperature chart (axis 4 visibly hot during a demo run). 1280×800.
+- `dashboard-ask-the-spec.jpg` — lower half of the Robotics Dashboard showing
+  the Status / Performance / Alerts row, the **Ask the Spec** chat panel, and
+  the **Active Recommendation** card with Approve / Reject buttons. 1280×800.
+- `stream-viewer.jpg` — NVIDIA web-viewer-sample at `http://stack.local:8082/`,
+  the WebRTC client that connects to Omniverse Kit on GPU 1. (Replace with a
+  full-stream capture when the kit is settled.)
 
 ## Conventions
 
-- Keep screenshots PNG, ≤ 1600 px wide, no personal identifiers visible.
-- Mermaid diagrams stay inline in the README — GitHub renders them natively.
-- If you add more images, reference them from the README with a short alt
-  text and a one-line caption.
+- JPEG @ ~90% quality keeps individual files ≤ 130 KB; PNG only when
+  transparency or sharp linework matters (e.g. the architecture diagram).
+- 1280×800 is the canonical dashboard capture size — fits a GitHub README
+  column without scaling and keeps text readable.
+- No personal identifiers, internal IPs, real LAN hostnames in any image.

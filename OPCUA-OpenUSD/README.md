@@ -2,56 +2,24 @@
 
 A containerized Industry 4.0 demo on a single Linux GPU host that wires
 **OPC UA**, **OpenUSD**, a **RAG-grounded advisory agent**, and a **streamed
-Omniverse Kit view**. All twelve services run from one `docker compose up`.
+Omniverse Kit view**. All services run from one `docker compose up`.
 
-![Robotics Dashboard](docs/dashboard.png)
+![Robotics Dashboard](docs/dashboard-hero.jpg)
 
 ## Architecture
 
-```mermaid
-flowchart LR
-    Browser["Browser on Mac"]
+![System architecture](docs/architecture.png)
 
-    subgraph Host["GPU host (bare metal)"]
-        vLLM["vLLM<br/>Nemotron Nano 8B<br/>GPU 0"]
-        Kit["Omniverse Kit<br/>USD viewer + WebRTC<br/>GPU 1"]
-    end
-
-    subgraph Stack["Docker network: stack"]
-        Traefik["Traefik<br/>TLS termination"]
-        Landing["landing"]
-        Dashboard["dashboard<br/>(Robotics Dashboard +<br/>Ask the Spec)"]
-        StreamView["stream-viewer<br/>(WebRTC client)"]
-        Grafana["grafana / influxdb / telegraf"]
-        RAG["rag-mcp / spec"]
-        OPCUA["opcua-server<br/>(asyncua)"]
-        Bridge["bridge<br/>(OPC UA → USD)"]
-        Agent["agent<br/>(anomaly → spec → reco)"]
-        PG["pgvector"]
-        Vol[("shared volume<br/>live.usda")]
-    end
-
-    Browser -->|HTTPS| Traefik
-    Browser -->|HTTP :8082 page load| StreamView
-    StreamView -.->|WebRTC signaling :49100<br/>+ media :47995-48005/UDP| Kit
-    Traefik --> Landing
-    Traefik --> Dashboard
-    Traefik --> Grafana
-    Traefik --> RAG
-
-    Bridge -->|subscribes| OPCUA
-    Bridge -->|writes overrides| Vol
-    Kit -->|reads| Vol
-
-    Agent -->|subscribes| OPCUA
-    Agent -->|writes recommendation| OPCUA
-    Agent <--> RAG
-    RAG <--> PG
-    Agent -.->|MS Agent Framework<br/>+ OpenAI tool calling| vLLM
-    RAG -.->|generation| vLLM
-
-    Dashboard --> OPCUA
-```
+The Mac browser drives two flows: HTTPS to Traefik for the dashboard, Grafana,
+landing page, and spec API; plain HTTP to `stream-viewer` (port 8082), which
+opens a WebRTC handshake directly to Omniverse Kit on GPU 1 (signaling on
+`:49100`, media on UDP `47995–48005`). Inside the compose network the agent
+subscribes to OPC UA, runs anomaly detection against motor temperatures, queries
+the RAG-MCP service (which embeds the OPC UA spec corpus into pgvector and
+generates citations through vLLM), and writes spec-cited recommendations back
+to a separate OPC UA namespace. The bridge is a deterministic one-way mapper:
+OPC UA → USD overrides on a shared volume that both the bridge and the
+Omniverse Kit container read.
 
 ## URL map
 
@@ -177,6 +145,11 @@ The dashboard at `/dashboard/` is the primary operator UI:
 - in-app HITL approval panel — when the agent writes a recommendation, an
   Approve / Reject card appears; clicking Approve calls `ApproveRecommendation`
   on the OPC UA server which applies the recommended action
+
+![Ask the Spec + Active Recommendation](docs/dashboard-ask-the-spec.jpg)
+
+Above the fold the operator sees gauges + temperatures; below it the
+performance / alerts row, the spec chat, and the HITL recommendation card.
 
 ## Advisory agent
 
