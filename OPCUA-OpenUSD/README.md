@@ -56,13 +56,19 @@ Containers reach vLLM via `http://host.docker.internal:8000/v1`
 
 - [x] Phase 0 — Scaffolding (Traefik + landing page)
 - [x] Phase 1a — OPC UA server (asyncua, simulator, anomaly injection)
-- [x] Phase 1b — Node-RED dashboard
-- [x] Phase 2 — Bridge + USD authoring
-- [x] Phase 3 — InfluxDB + Telegraf + Grafana
-- [x] Phase 5 — pgvector + RAG-MCP
-- [x] Phase 6 — MAF agent (advisory, OpenAI tool-calling against vLLM)
-- [ ] Phase 4 — Omniverse Kit App Streaming  (requires vLLM shutdown to free GPU 1)
+- [x] Phase 1b — Node-RED dashboard (Dashboard 2.0, 75 nodes, OPC UA polling)
+- [x] Phase 2 — Bridge + USD authoring (≤200 ms write latency)
+- [x] Phase 3 — InfluxDB + Telegraf + Grafana (provisioned dashboard)
+- [x] Phase 5 — pgvector + RAG-MCP (14 273 chunks embedded from UA-for-AI-Prototype)
+- [x] Phase 6 — Advisory agent (anomaly → spec → recommendation → HITL approval)
+- [ ] Phase 4 — Omniverse Kit App Streaming  (deferred; see [omniverse-kit/README.md](omniverse-kit/README.md))
 - [x] Phase 7 — Polish, demo runbook, healthchecks
+
+### Verified end-to-end
+
+Anomaly → agent → spec citation → operator approval → ProgramState=6
+→ bridge propagates → status pad turns red in `live.usda`. All in ≤30 s
+on the host. Reproduce with `./scripts/demo-anomaly.sh`.
 
 ## GPU split
 
