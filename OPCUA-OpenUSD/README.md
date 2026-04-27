@@ -107,6 +107,9 @@ boot (`opcua-server/entrypoint.sh`).
 
 ## Demo flow
 
+A step-by-step walkthrough lives in [`docs/DEMO.md`](docs/DEMO.md). The
+condensed sequence:
+
 ```mermaid
 sequenceDiagram
     autonumber
@@ -119,18 +122,24 @@ sequenceDiagram
     participant Kit as Omniverse view
 
     Op->>OPC: InjectAnomaly("axis4_overheat")
-    OPC-->>Ag: motor_temp[4] > 90 °C (subscription push)
-    Ag-->>Ag: detector fires after 10 s sustained
+    OPC-->>OPC: simulator ramps axis-4 motor 28 → 95 °C over 8 s
+    OPC-->>OPC: safety interlock at 90 °C → ProgramState 2 → 4 (Stopped)
+    OPC-->>Br: subscription push (state, frozen positions)
+    Br->>USD: write live.usda (joints frozen)
+    OPC-->>Ag: motor_temp[4] ≥ 90 °C (subscription push)
+    Ag-->>Ag: detector fires on first crossing (30 s cooldown)
     Ag->>RAG: query_specification("over-temperature axis")
     RAG-->>Ag: spec citations (UA-for-AI-Prototype corpus)
     Ag->>OPC: write RobotRecommendations.ActiveRecommendation
-    Op->>Op: review JSON in /dashboard/
+    Op->>Op: review "🤖 AGENTIC ALERT" panel in /dashboard/
     Op->>OPC: ApproveRecommendation("current", true)
-    OPC-->>OPC: ProgramState = 6 (MaintenanceRequired)
-    OPC-->>Br: subscription push (new ProgramState)
-    Br->>USD: status pad displayColor → red
+    OPC-->>OPC: ProgramState 4 → 6 (MaintenanceRequired, latched)
+    Op->>OPC: ResetMaintenance() (↻ Reset button)
+    OPC-->>OPC: thermal baselined, ProgramState 6 → 2 (Running)
+    OPC-->>Br: subscription push (new positions)
+    Br->>USD: write live.usda (joints sweeping)
     USD-->>Kit: file-watch reload
-    Kit-->>Op: red status pad in stream
+    Kit-->>Op: robot moves again
 ```
 
 ![Omniverse Kit USD viewer streamed via WebRTC](docs/stream-viewer.jpg)

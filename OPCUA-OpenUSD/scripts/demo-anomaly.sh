@@ -12,11 +12,11 @@ echo "1. Confirming all services healthy..."
 ./scripts/healthcheck.sh || true
 
 echo
-echo "2. Starting 30 s baseline observation period..."
-sleep 30
+echo "2. 5 s baseline observation..."
+sleep 5
 
 echo
-echo "3. Injecting anomaly: axis 4 motor overheat..."
+echo "3. Injecting anomaly: axis 4 motor overheat (8 s ramp; safety auto-stops at 90 °C)..."
 docker compose exec -T opcua-server python -c "
 import asyncio
 from asyncua import Client, ua
@@ -31,8 +31,8 @@ asyncio.run(main())
 "
 
 echo
-echo "4. Watching for agent recommendation (max 90 s)..."
-deadline=$(( $(date +%s) + 90 ))
+echo "4. Watching for agent recommendation (max 30 s)..."
+deadline=$(( $(date +%s) + 30 ))
 RECO=""
 while [[ $(date +%s) -lt $deadline ]]; do
     RECO=$(docker compose exec -T opcua-server python -c "
@@ -50,13 +50,14 @@ asyncio.run(main())
         echo "$RECO" | python3 -m json.tool 2>/dev/null || echo "$RECO"
         break
     fi
-    sleep 5
+    sleep 2
 done
 
 if [[ -z "$RECO" ]]; then
-    echo "No recommendation within 90 s — check 'docker logs rt-agent'."
+    echo "No recommendation within 30 s — check 'docker logs rt-agent'."
     exit 1
 fi
 
 echo
 echo "5. Demo complete. Approve in the Robotics Dashboard at https://${HOST}/dashboard/"
+echo "   Then click the ↻ Reset button to baseline thermal state and resume motion."
