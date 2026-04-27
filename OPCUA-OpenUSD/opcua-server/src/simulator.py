@@ -74,8 +74,34 @@ class Simulator:
             except Exception:
                 pass
 
-            # Trajectory.
-            t = time.monotonic() - self.t0
+            # Trajectory advances ONLY while ProgramState is Running (=2).
+            # In Idle (0) / Stopping (3) / Stopped (4) / Aborted (5) /
+            # MaintenanceRequired (6) the joints hold their last position so
+            # the operator UI is consistent with what the controller reports.
+            #
+            # We track a "motion clock" t_motion that only ticks in Running,
+            # so the trajectory resumes from where it paused on the next
+            # transition back to Running.
+            now = time.monotonic()
+            dt_real = now - getattr(self, "_last_tick", now)
+            self._last_tick = now
+
+            # Read external program-state writes (operator approval flow flips
+            # this from the agent → ApproveRecommendation path).
+            try:
+                ext_ps = int(await self.addr.program_state.read_value())
+                if ext_ps != program_state and program_state in (2, 3, 0):
+                    # Honor external transitions only for the heartbeat states
+                    # plus 6 (MaintenanceRequired). Aborted (5) also paralyses.
+                    program_state = ext_ps
+            except Exception:
+                pass
+
+            is_running = program_state == 2
+            if is_running:
+                self._t_motion = getattr(self, "_t_motion", 0.0) + dt_real
+
+            t = getattr(self, "_t_motion", 0.0)
             seg = (t / WAYPOINT_DURATION_S)
             seg_idx = int(seg) % len(WAYPOINTS)
             seg_next = (seg_idx + 1) % len(WAYPOINTS)
@@ -83,26 +109,32 @@ class Simulator:
 
             self.prev_pos = list(self.pos)
             for i in range(6):
-                base = WAYPOINTS[seg_idx][i] * (1 - alpha) + WAYPOINTS[seg_next][i] * alpha
-                jitter = math.sin(t * (0.7 + i * 0.13)) * 0.4
-                self.pos[i] = base + jitter
-                self.speed[i] = (self.pos[i] - self.prev_pos[i]) / DT
+                if is_running:
+                    base = WAYPOINTS[seg_idx][i] * (1 - alpha) + WAYPOINTS[seg_next][i] * alpha
+                    jitter = math.sin(t * (0.7 + i * 0.13)) * 0.4
+                    self.pos[i] = base + jitter
+                    self.speed[i] = (self.pos[i] - self.prev_pos[i]) / DT
+                else:
+                    # Hold position; speed → 0.
+                    self.speed[i] = 0.0
 
-            # Cycle counter — increment when we wrap waypoint sequence.
-            new_cycle = int(t / (WAYPOINT_DURATION_S * len(WAYPOINTS)))
-            if new_cycle != self.cycle:
-                self.cycle = new_cycle
-                await self.addr.cycle_counter.write_value(
-                    ua.Variant(new_cycle, ua.VariantType.UInt64)
-                )
+            # Cycle counter only increments while running.
+            if is_running:
+                new_cycle = int(t / (WAYPOINT_DURATION_S * len(WAYPOINTS)))
+                if new_cycle != self.cycle:
+                    self.cycle = new_cycle
+                    await self.addr.cycle_counter.write_value(
+                        ua.Variant(new_cycle, ua.VariantType.UInt64)
+                    )
 
-            # ProgramState heartbeat: cycle through Running/Stopping/Idle every ~30 s
-            if time.monotonic() - last_state_change > 30.0:
+            # ProgramState heartbeat: cycle 2→3→0→2 every 30 s (only when
+            # not externally pinned to a non-heartbeat state like 6).
+            if program_state in (2, 3, 0) and (now - last_state_change) > 30.0:
                 program_state = {2: 3, 3: 0, 0: 2}.get(program_state, 2)
                 await self.addr.program_state.write_value(
                     ua.Variant(program_state, ua.VariantType.Int32)
                 )
-                last_state_change = time.monotonic()
+                last_state_change = now
 
             # Thermal model.
             for i in range(6):

@@ -15,7 +15,7 @@
       "targets": [
         {
           "refId": "A",
-          "query": "from(bucket: \"robot\")\n  |> range(start: -15m)\n  |> filter(fn: (r) => r._measurement == \"axis\" and r.metric == \"position\")\n  |> filter(fn: (r) => r._field == \"axis1_pos\" or r._field == \"axis2_pos\" or r._field == \"axis3_pos\" or r._field == \"axis4_pos\" or r._field == \"axis5_pos\" or r._field == \"axis6_pos\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"position\")"
+          "query": "from(bucket: \"robot\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"axis\")\n  |> filter(fn: (r) => r._field == \"axis1_pos\" or r._field == \"axis2_pos\" or r._field == \"axis3_pos\" or r._field == \"axis4_pos\" or r._field == \"axis5_pos\" or r._field == \"axis6_pos\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])\n  |> yield(name: \"position\")"
         }
       ],
       "fieldConfig": {
@@ -45,7 +45,7 @@
       "targets": [
         {
           "refId": "A",
-          "query": "from(bucket: \"robot\")\n  |> range(start: -15m)\n  |> filter(fn: (r) => r._measurement == \"axis\" and r.metric == \"motor_temp\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"motor_temp\")"
+          "query": "from(bucket: \"robot\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"axis\")\n  |> filter(fn: (r) => r._field == \"axis1_motor_temp\" or r._field == \"axis2_motor_temp\" or r._field == \"axis3_motor_temp\" or r._field == \"axis4_motor_temp\" or r._field == \"axis5_motor_temp\" or r._field == \"axis6_motor_temp\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])\n  |> yield(name: \"motor_temp\")"
         }
       ],
       "fieldConfig": {
@@ -84,7 +84,7 @@
       "targets": [
         {
           "refId": "A",
-          "query": "from(bucket: \"robot\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"scalar\" and r._field == \"cycle_counter\")\n  |> last()"
+          "query": "from(bucket: \"robot\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"scalar\" and r._field == \"cycle_counter\")\n  |> keep(columns: [\"_time\", \"_value\"])\n  |> last()"
         }
       ],
       "fieldConfig": {
@@ -112,7 +112,7 @@
       "targets": [
         {
           "refId": "A",
-          "query": "from(bucket: \"robot\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"scalar\" and r._field == \"program_state\")\n  |> last()"
+          "query": "from(bucket: \"robot\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"scalar\" and r._field == \"program_state\")\n  |> keep(columns: [\"_time\", \"_value\"])\n  |> last()"
         }
       ],
       "fieldConfig": {
