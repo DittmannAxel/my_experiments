@@ -30,8 +30,11 @@ OPCUA_PASSWORD = os.environ.get("OPCUA_PASSWORD", "changeme-please")
 
 
 class StaticUserManager(UserManager):
-    """Validates the single OPCUA_USER/OPCUA_PASSWORD pair from the env."""
+    """Anonymous reads allowed; admin write requires OPCUA_USER/OPCUA_PASSWORD."""
     def get_user(self, iserver, username=None, password=None, certificate=None):  # noqa: ARG002
+        if username is None and password is None:
+            # Anonymous session — allow read-only access.
+            return User(role=UserRole.User, name="anonymous")
         if username == OPCUA_USER and password == OPCUA_PASSWORD:
             return User(role=UserRole.Admin, name=username)
         return None
@@ -52,8 +55,8 @@ async def main():
         ua.SecurityPolicyType.Basic256Sha256_SignAndEncrypt,
     ])
     server.set_identity_tokens([
-        ua.AnonymousIdentityToken(),
-        ua.UserNameIdentityToken(),
+        ua.AnonymousIdentityToken,
+        ua.UserNameIdentityToken,
     ])
 
     # Load own cert/key.
