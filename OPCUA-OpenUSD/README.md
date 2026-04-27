@@ -112,12 +112,3 @@ See `scripts/demo-anomaly.sh`. Summary:
    action (e.g. `ProgramState=6` MaintenanceRequired).
 6. The bridge propagates that state into `live.usda`, where the Omniverse view
    (Phase 4) will reflect it visually as a red status pad.
-
-## Troubleshooting
-
-- **502 Bad Gateway on `/spec/...`** — RAG-MCP is still embedding the spec corpus
-  on first boot (5–15 min). `docker logs rt-rag-mcp` shows progress.
-- **Traefik 404 on a new path** — restart Traefik (`docker restart rt-traefik`);
-  the file-watcher occasionally misses edits to `traefik/dynamic.yml`.
-- **`scripts/healthcheck.sh` flakes on first run** — re-run after services finish
-  startup (Grafana provisioning takes a moment).
