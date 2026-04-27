@@ -133,6 +133,15 @@ sequenceDiagram
     Kit-->>Op: red status pad in stream
 ```
 
+![Omniverse Kit USD viewer streamed via WebRTC](docs/stream-viewer.jpg)
+
+The 3D scene streamed at `http://stack.local:8082/` — a 6-axis robot
+articulated chain on a grey cell floor, the blue pickup station and green
+dropoff station, the green status pad (turns red on `MaintenanceRequired`),
+and the four yellow fence corner posts. The bridge writes joint rotations and
+material colours into `live.usda` at 10 Hz; the Kit App reloads the layer on
+file-watch and the WebRTC track surfaces the change in &lt;500 ms.
+
 ## Robotics Dashboard
 
 The dashboard at `/dashboard/` is the primary operator UI:

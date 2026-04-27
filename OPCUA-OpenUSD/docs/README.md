@@ -10,9 +10,10 @@ Static assets for the top-level `OPCUA-OpenUSD/README.md`.
 - `dashboard-ask-the-spec.jpg` — lower half of the Robotics Dashboard showing
   the Status / Performance / Alerts row, the **Ask the Spec** chat panel, and
   the **Active Recommendation** card with Approve / Reject buttons. 1280×800.
-- `stream-viewer.jpg` — NVIDIA web-viewer-sample at `http://stack.local:8082/`,
-  the WebRTC client that connects to Omniverse Kit on GPU 1. (Replace with a
-  full-stream capture when the kit is settled.)
+- `stream-viewer.jpg` — Omniverse Kit USD viewer streamed via WebRTC at
+  `http://stack.local:8082/`. Shows the simulated cell: 6-axis robot, blue
+  pickup + green dropoff stations, green status pad, fence corners.
+  859×451, ~28 KB.
 
 ## Conventions
 
