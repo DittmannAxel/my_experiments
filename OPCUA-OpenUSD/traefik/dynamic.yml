@@ -22,11 +22,11 @@ http:
       tls: {}
 
     # ──────────── Phase 1b: Node-RED ────────────
-    # nodered:
-    #   rule: "Host(`stack.local`) && PathPrefix(`/nodered`)"
-    #   service: nodered
-    #   entryPoints: [websecure]
-    #   tls: {}
+    nodered:
+      rule: "Host(`stack.local`) && PathPrefix(`/nodered`)"
+      service: nodered
+      entryPoints: [websecure]
+      tls: {}
 
     # ──────────── Phase 3: Grafana ────────────
     # grafana:
@@ -55,10 +55,10 @@ http:
         servers:
           - url: "http://landing-page:80"
 
-    # nodered:
-    #   loadBalancer:
-    #     servers:
-    #       - url: "http://opcua-nodered:1880"
+    nodered:
+      loadBalancer:
+        servers:
+          - url: "http://opcua-nodered:1880"
     # grafana:
     #   loadBalancer:
     #     servers:

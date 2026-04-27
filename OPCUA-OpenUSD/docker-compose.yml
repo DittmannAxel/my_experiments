@@ -46,6 +46,18 @@ services:
     networks:
       - stack
 
+  opcua-nodered:
+    build: ./opcua-nodered
+    container_name: rt-nodered
+    restart: unless-stopped
+    depends_on:
+      opcua-server:
+        condition: service_healthy
+    networks:
+      - stack
+    volumes:
+      - nodered-data:/data
+
 networks:
   stack:
     name: stack
@@ -53,3 +65,4 @@ networks:
 
 volumes:
   opcua-certs:
+  nodered-data:
