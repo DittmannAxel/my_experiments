@@ -9,8 +9,7 @@ import sys
 from pathlib import Path
 
 from asyncua import Server, ua
-from asyncua.crypto.permission_rules import SimpleRoleRuleset
-from asyncua.server.users import User, UserRole
+from asyncua.server.user_managers import User, UserManager, UserRole
 
 from .robotics_model import build_address_space
 from .simulator import Simulator
@@ -30,19 +29,16 @@ OPCUA_USER = os.environ.get("OPCUA_USER", "axel")
 OPCUA_PASSWORD = os.environ.get("OPCUA_PASSWORD", "changeme-please")
 
 
-def user_manager(iserver, username, password):  # noqa: ARG001
-    """Return a User object on successful auth, None otherwise.
-
-    Anonymous connections are allowed by the server policy (no callback hit);
-    when username+password is presented we validate it here.
-    """
-    if username == OPCUA_USER and password == OPCUA_PASSWORD:
-        return User(role=UserRole.Admin)
-    return None
+class StaticUserManager(UserManager):
+    """Validates the single OPCUA_USER/OPCUA_PASSWORD pair from the env."""
+    def get_user(self, iserver, username=None, password=None, certificate=None):  # noqa: ARG002
+        if username == OPCUA_USER and password == OPCUA_PASSWORD:
+            return User(role=UserRole.Admin, name=username)
+        return None
 
 
 async def main():
-    server = Server(user_manager=user_manager)
+    server = Server(user_manager=StaticUserManager())
     await server.init()
 
     server.set_endpoint("opc.tcp://0.0.0.0:4840/axel/robot")
