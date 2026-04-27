@@ -88,14 +88,17 @@ class Simulator:
             dt_real = now - getattr(self, "_last_tick", now)
             self._last_tick = now
 
-            # Read external program-state writes (operator approval flow flips
-            # this from the agent → ApproveRecommendation path).
+            # Read external program-state writes. Two paths flip this:
+            #   (a) agent → ApproveRecommendation → ProgramState=6 (Maintenance)
+            #   (b) operator → dashboard Reset → ProgramState=2 (Running)
+            # Honor any external transition; otherwise we'd get stuck in 6
+            # forever, with no way to resume the demo without restarting the
+            # container.
             try:
                 ext_ps = int(await self.addr.program_state.read_value())
-                if ext_ps != program_state and program_state in (2, 3, 0):
-                    # Honor external transitions only for the heartbeat states
-                    # plus 6 (MaintenanceRequired). Aborted (5) also paralyses.
+                if ext_ps != program_state:
                     program_state = ext_ps
+                    last_state_change = now
             except Exception:
                 pass
 

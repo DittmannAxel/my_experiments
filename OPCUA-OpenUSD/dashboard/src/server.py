@@ -220,6 +220,35 @@ async def clear_anomaly() -> dict:
     return {"status": "ok"}
 
 
+@app.post("/api/reset")
+async def reset() -> dict:
+    """Recover from MaintenanceRequired/Aborted by clearing the active
+    recommendation, clearing any anomaly, and writing ProgramState=2 (Running).
+    The simulator picks up the external write and resumes the trajectory.
+    """
+    async with Client(url=OPCUA_ENDPOINT) as c:
+        ns = await c.get_namespace_index("urn:axel:robot")
+        ns_r = await c.get_namespace_index("urn:axel:robot:recommendations")
+        # Clear anomaly (so the agent doesn't immediately re-recommend).
+        method_inj = c.get_node(f"ns={ns};s=RobotController.TaskControl.InjectAnomaly")
+        tc = c.get_node(f"ns={ns};s=RobotController.TaskControl")
+        try:
+            await tc.call_method(method_inj, ua.Variant("", ua.VariantType.String))
+        except Exception:
+            pass
+        # Clear active recommendation.
+        try:
+            active = c.get_node(f"ns={ns_r};s=RobotRecommendations.ActiveRecommendation")
+            await active.write_value(ua.Variant("", ua.VariantType.String))
+        except Exception:
+            pass
+        # Force ProgramState back to Running (=2). The simulator now honors
+        # external writes from any state, so this resumes motion.
+        ps = c.get_node(f"ns={ns};s=RobotController.ProgramState")
+        await ps.write_value(ua.Variant(2, ua.VariantType.Int32))
+    return {"status": "ok"}
+
+
 @app.post("/api/approve")
 async def approve(approved: bool = True) -> dict:
     async with Client(url=OPCUA_ENDPOINT) as c:

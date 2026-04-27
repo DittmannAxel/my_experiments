@@ -304,6 +304,22 @@ function basePath() {
 document.getElementById("inject-btn").addEventListener("click", async () => {
   await fetch(`${basePath()}/api/inject-anomaly`, { method: "POST" });
 });
+document.getElementById("reset-btn").addEventListener("click", async (ev) => {
+  // Visual confirmation; the WebSocket snapshot will reflect the live state
+  // (positions starting to move, state going back to Running) within a beat.
+  const btn = ev.currentTarget;
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "Resetting…";
+  try {
+    const r = await fetch(`${basePath()}/api/reset`, { method: "POST" });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  } catch (e) {
+    btn.textContent = `Failed: ${e.message || e}`;
+  } finally {
+    setTimeout(() => { btn.disabled = false; btn.textContent = original; }, 1500);
+  }
+});
 
 // ─────── Ask the Spec ───────
 const askThread = document.getElementById("ask-thread");
