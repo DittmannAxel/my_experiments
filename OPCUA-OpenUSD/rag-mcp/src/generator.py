@@ -46,6 +46,10 @@ async def answer(question: str, chunks: list[Chunk]) -> str:
             {"role": "user", "content": user_msg},
         ],
         temperature=0.1,
-        max_tokens=600,
+        max_tokens=2048,
+        # Qwen3 reasoning is separated by --reasoning-parser; we don't need
+        # the chain-of-thought in the user-visible answer.
+        extra_body={"chat_template_kwargs": {"enable_thinking": False}},
     )
-    return resp.choices[0].message.content or ""
+    msg = resp.choices[0].message
+    return (msg.content or getattr(msg, "reasoning", None) or "").strip()

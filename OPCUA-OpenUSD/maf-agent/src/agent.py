@@ -114,7 +114,11 @@ async def handle_anomaly(ev: AnomalyEvent) -> None:
             tools=TOOL_SCHEMAS,
             tool_choice="auto",
             temperature=0.2,
-            max_tokens=900,
+            max_tokens=2048,
+            # Disable chain-of-thought so the model produces tool_calls
+            # in the same response window. With thinking enabled, Qwen3
+            # uses up tokens before getting to the action.
+            extra_body={"chat_template_kwargs": {"enable_thinking": False}},
         )
         msg = resp.choices[0].message
 
