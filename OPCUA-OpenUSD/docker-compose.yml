@@ -1,5 +1,6 @@
-# Robot Digital Twin PoC — Phase 0 (Traefik + landing page only).
-# Later phases extend this file with additional services.
+# Robot Digital Twin PoC — Phase 0 (Traefik + landing page).
+# Routing config lives in traefik/dynamic.yml (file provider, not docker labels).
+# Later phases append services here and uncomment the matching block in dynamic.yml.
 name: robot-twin-poc
 
 services:
@@ -7,23 +8,17 @@ services:
     image: traefik:v3.3
     container_name: rt-traefik
     restart: unless-stopped
-    command: []
-    environment:
-      # Docker 29 daemon requires API >= 1.40; pin Traefik's client so it
-      # doesn't fall back to 1.24 when negotiation skips.
-      - DOCKER_API_VERSION=1.45
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
       - ./traefik/dynamic.yml:/etc/traefik/dynamic/dynamic.yml:ro
       - ./traefik/certs:/etc/traefik/certs:ro
     networks:
       - stack
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "--no-check-certificate", "http://localhost:80/", "-S"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:80/ -S 2>&1 | grep -q HTTP || exit 1"]
       interval: 10s
       timeout: 3s
       start_period: 5s
@@ -35,14 +30,6 @@ services:
     restart: unless-stopped
     networks:
       - stack
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=stack"
-      - "traefik.http.routers.landing.rule=Host(`${STACK_HOSTNAME:-stack.local}`) && PathPrefix(`/`)"
-      - "traefik.http.routers.landing.priority=1"
-      - "traefik.http.routers.landing.entrypoints=websecure"
-      - "traefik.http.routers.landing.tls=true"
-      - "traefik.http.services.landing.loadbalancer.server.port=80"
 
 networks:
   stack:

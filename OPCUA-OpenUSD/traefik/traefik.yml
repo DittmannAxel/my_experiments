@@ -14,11 +14,14 @@ entryPoints:
   websecure:
     address: ":443"
 
+# File provider only.
+#
+# We explicitly do NOT use the Docker provider here. Docker 29 removed
+# support for API versions below 1.40, and the docker SDK used by Traefik's
+# Docker provider tries to negotiate via /v1.24/info first, which the
+# daemon now rejects. Using the file provider sidesteps that entirely; all
+# routes are declared in traefik/dynamic.yml.
 providers:
-  docker:
-    endpoint: "unix:///var/run/docker.sock"
-    exposedByDefault: false
-    network: stack
   file:
     directory: /etc/traefik/dynamic
     watch: true
@@ -27,6 +30,3 @@ log:
   level: INFO
 
 accessLog: {}
-
-# Self-signed CA & wildcard cert mounted from ./traefik/certs
-# (see scripts/gen-certs.sh)

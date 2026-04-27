@@ -7,3 +7,67 @@ tls:
       defaultCertificate:
         certFile: /etc/traefik/certs/stack.local.crt
         keyFile: /etc/traefik/certs/stack.local.key
+
+# All routes declared here. As phases come online, append to `routers` and
+# `services` below. Backends are reachable via container DNS on the `stack`
+# network (the docker-compose network name).
+http:
+  routers:
+    landing:
+      rule: "Host(`stack.local`) && PathPrefix(`/`)"
+      service: landing
+      priority: 1
+      entryPoints:
+        - websecure
+      tls: {}
+
+    # ──────────── Phase 1b: Node-RED ────────────
+    # nodered:
+    #   rule: "Host(`stack.local`) && PathPrefix(`/nodered`)"
+    #   service: nodered
+    #   entryPoints: [websecure]
+    #   tls: {}
+
+    # ──────────── Phase 3: Grafana ────────────
+    # grafana:
+    #   rule: "Host(`stack.local`) && PathPrefix(`/grafana`)"
+    #   service: grafana
+    #   entryPoints: [websecure]
+    #   tls: {}
+
+    # ──────────── Phase 4: Omniverse Kit ────────────
+    # usd:
+    #   rule: "Host(`stack.local`) && PathPrefix(`/usd`)"
+    #   service: usd
+    #   entryPoints: [websecure]
+    #   tls: {}
+
+    # ──────────── Phase 5: rag-mcp ────────────
+    # spec:
+    #   rule: "Host(`stack.local`) && PathPrefix(`/spec`)"
+    #   service: spec
+    #   entryPoints: [websecure]
+    #   tls: {}
+
+  services:
+    landing:
+      loadBalancer:
+        servers:
+          - url: "http://landing-page:80"
+
+    # nodered:
+    #   loadBalancer:
+    #     servers:
+    #       - url: "http://opcua-nodered:1880"
+    # grafana:
+    #   loadBalancer:
+    #     servers:
+    #       - url: "http://grafana:3000"
+    # usd:
+    #   loadBalancer:
+    #     servers:
+    #       - url: "http://omniverse-kit:8443"
+    # spec:
+    #   loadBalancer:
+    #     servers:
+    #       - url: "http://rag-mcp:49322"
