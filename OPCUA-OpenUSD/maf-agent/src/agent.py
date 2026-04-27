@@ -113,8 +113,13 @@ def _format_anomaly(ev: AnomalyEvent) -> str:
         f"  value: {ev.value:.2f} C\n"
         f"  threshold: {ev.threshold:.1f} C\n"
         f"  duration_above: {ev.duration_above:.1f} s\n\n"
-        "Investigate and call write_recommendation_to_opcua with a "
-        "spec-cited recommendation. Use query_specification at most once."
+        "Call query_specification ONCE for context, then call "
+        "write_recommendation_to_opcua exactly once with:\n"
+        "  - title: short label of the issue\n"
+        "  - rationale: 2-3 sentences citing the spec\n"
+        "  - actions: [{\"node_id\": \"RobotController.ProgramState\", \"value\": 6}]\n"
+        "  - spec_citation: the relevant Part/section\n"
+        "Do not respond with prose — call the tools."
     )
 
 
@@ -131,7 +136,7 @@ async def handle_anomaly(ev: AnomalyEvent) -> None:
     try:
         result = await agent.run(
             _format_anomaly(ev),
-            options={"max_tokens": 2048, "temperature": 0.2},
+            options={"max_tokens": 4096, "temperature": 0.2, "tool_choice": "auto"},
         )
     except Exception:
         log.exception("Agent run failed")
