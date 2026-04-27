@@ -9,11 +9,14 @@ from dataclasses import dataclass, field
 log = logging.getLogger("anomaly")
 
 THRESHOLD_C = 90.0
-# Tightened for live-demo cadence: simulator ramp is now 8 s, so a 3 s
-# sustained-above window is enough to suppress one-frame spikes while letting
-# the agent fire ~12 s after Inject. 30 s cooldown lets the operator repeat
-# the demo without waiting two minutes between injections.
-DURATION_S = 3.0
+# Tightened for live-demo cadence and to interleave with the simulator's
+# safety interlock (also at 90 °C): the moment temp crosses 90, the cell
+# auto-stops (ProgramState 2 → 4) and motor cooling kicks in immediately at
+# THERMAL_C·(95-22) ≈ 4.4 °C/s, so the value drops back below 90 within
+# ~1.1 s. A 0.5 s sustained-above window comfortably fires the agent inside
+# that envelope while still suppressing single-sample noise. 30 s cooldown
+# lets the operator repeat the demo without a two-minute wait.
+DURATION_S = 0.5
 COOLDOWN_S = 30.0
 
 

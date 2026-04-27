@@ -32,6 +32,10 @@ T_AMBIENT = 22.0           # °C
 T_BASE_MOTOR = 28.0        # °C, idle motor temp
 THERMAL_K = 0.05           # heating per |deg/s|
 THERMAL_C = 0.06           # cooling toward ambient
+# Safety interlock: any axis crossing this limit while Running auto-transitions
+# the cell to Stopped (4). Same value as the anomaly-detector threshold so the
+# auto-stop and the agent's recommendation arrive within the same demo beat.
+SAFETY_THRESHOLD_C = 90.0
 
 
 class Simulator:
@@ -111,9 +115,21 @@ class Simulator:
                     log.info("Operator reset — thermal state baselined, ProgramState=2")
                 else:
                     ext_ps = int(await self.addr.program_state.read_value())
-                    if ext_ps != program_state and program_state in (2, 3, 0):
-                        program_state = ext_ps
-                        last_state_change = now
+                    if ext_ps != program_state:
+                        # Heartbeat states {2 Running, 3 Stopping, 0 Idle}
+                        # accept any external transition. State {4 Stopped}
+                        # additionally accepts a transition to {6
+                        # MaintenanceRequired} — this is the operator-approve
+                        # path: safety auto-stopped the cell, the agent filed
+                        # a recommendation, the operator acknowledges by
+                        # writing 6. States {5 Aborted, 6 MaintenanceRequired}
+                        # are otherwise latched until the next reset_event.
+                        if program_state in (2, 3, 0):
+                            program_state = ext_ps
+                            last_state_change = now
+                        elif program_state == 4 and ext_ps == 6:
+                            program_state = ext_ps
+                            last_state_change = now
             except Exception:
                 pass
 
@@ -187,6 +203,24 @@ class Simulator:
                 target = min(95.0, T_BASE_MOTOR + (95.0 - T_BASE_MOTOR) * (age / 8.0))
                 # Pull axis-4 motor temp up toward `target`.
                 self.motor_temp[3] = max(self.motor_temp[3], target + random.uniform(-0.3, 0.3))
+
+            # Safety interlock: any axis crossing SAFETY_THRESHOLD_C while the
+            # cell is producing auto-transitions ProgramState to 4 (Stopped).
+            # This is independent of the agent flow — the cell halts before
+            # the agent files its recommendation, and stays halted (latched)
+            # until either the operator approves the recommendation
+            # (4 → 6 MaintenanceRequired) or hits Reset (4/6 → 2 Running).
+            if program_state == 2 and any(t >= SAFETY_THRESHOLD_C for t in self.motor_temp):
+                hot = [(i + 1, self.motor_temp[i]) for i in range(6) if self.motor_temp[i] >= SAFETY_THRESHOLD_C]
+                program_state = 4
+                last_state_change = now
+                await self.addr.program_state.write_value(
+                    ua.Variant(program_state, ua.VariantType.Int32)
+                )
+                log.warning(
+                    "SAFETY INTERLOCK: axis(es) %s exceeded %.0f °C — auto-stop, ProgramState=4",
+                    hot, SAFETY_THRESHOLD_C,
+                )
 
             # Write back to OPC UA. Batch in a TaskGroup to avoid serial round-trips.
             await self._write_axes()

@@ -219,12 +219,20 @@ function applySnapshot(snap) {
   const psTag = document.getElementById("ps-tag");
   psEl.textContent = psLabel;
   psEl.classList.remove("warn", "err");
-  if (snap.program_state === 6 || snap.program_state === 5) {
+  // Safety interlock (state 4) and agentic-maintenance acknowledgement
+  // (state 6) are both critical conditions: render red and explicit copy.
+  if (snap.program_state === 4) {
     psEl.classList.add("err");
-    psTag.textContent = snap.program_state === 6 ? "Maintenance required" : "Aborted";
-  } else if (snap.program_state === 3 || snap.program_state === 4) {
+    psTag.textContent = "Safety interlock — over-temperature; awaiting agentic recommendation";
+  } else if (snap.program_state === 6) {
+    psEl.classList.add("err");
+    psTag.textContent = "Agentic maintenance — operator must hit Reset to resume";
+  } else if (snap.program_state === 5) {
+    psEl.classList.add("err");
+    psTag.textContent = "Aborted";
+  } else if (snap.program_state === 3) {
     psEl.classList.add("warn");
-    psTag.textContent = "Stopping / stopped";
+    psTag.textContent = "Stopping";
   } else {
     psTag.textContent = "All systems normal";
   }
