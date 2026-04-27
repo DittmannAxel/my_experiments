@@ -236,16 +236,38 @@ services:
               capabilities: [gpu]
     volumes:
       - usd-stage:/stage:ro
-    expose:
-      # WebRTC signaling (TCP). Default for omni.kit.livestream.app primaryStream
-      # is 49100 — see omni.kit.livestream.app/config/extension.toml.
-      - "49100"
     ports:
-      # WebRTC media — UDP, must be host-published, NOT proxied via Traefik.
-      # Includes the default streamPort 47998 and headroom for spectator streams.
+      # WebRTC signaling (TCP). The browser opens a WebSocket directly to
+      # ws://stack.local:49100/ — Traefik can't TLS-terminate this transparently
+      # because the AppStreamer library constructs the URL as <server>:<port>/
+      # without a path prefix.
+      - "49100:49100"
+      # WebRTC media — UDP, host-published, NOT proxied via Traefik.
+      # Includes the default streamPort 47998 plus headroom for spectator streams.
       - "47995-48005:47995-48005/udp"
     networks:
       - stack
+
+  # Plain-HTTP static server for the WebRTC viewer (NVIDIA web-viewer-sample
+  # build artifacts). Plain HTTP on purpose — signaling is plain ws:// to
+  # omniverse-kit:49100, and the browser blocks ws:// from an https origin
+  # (mixed-content). The dist is built out-of-band on the host via
+  # `cd ~/dev/git/omniverse/web-viewer-sample && npm run build`.
+  stream-viewer:
+    image: nginx:1.27-alpine
+    container_name: rt-stream-viewer
+    restart: unless-stopped
+    volumes:
+      - ${VIEWER_DIST:-/home/axel/dev/git/omniverse/web-viewer-sample/dist}:/usr/share/nginx/html:ro
+    ports:
+      - "8082:80"
+    networks:
+      - stack
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO /dev/null http://localhost:80/ || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
 
 networks:
   stack:
