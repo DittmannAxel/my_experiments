@@ -1,0 +1,37 @@
+# Playback file consumed by `kit-app-template/repo.sh template replay`.
+# This is the fully non-interactive way to render the USD Viewer template
+# with a custom name + the default WebRTC streaming layer.
+#
+# Usage on the host (after the kit-app-template repo is cloned at
+# ~/dev/git/omniverse/kit-app-template):
+#
+#   touch ~/dev/git/omniverse/kit-app-template/.omniverse_eula_accepted.txt
+#   cd   ~/dev/git/omniverse/kit-app-template
+#   ./repo.sh template replay /path/to/playback.toml
+#
+# The .omniverse_eula_accepted.txt breadcrumb bypasses the interactive
+# `questionary`-driven EULA prompt (file path is hard-coded in
+# repo_kit_template/.../template_tool.py:_eula_check). Without it, the
+# EULA prompt fails with EOFError when stdin is not a TTY.
+
+[omni_usd_viewer]
+application_name         = "axel.robot_twin_viewer"
+application_display_name = "Robot Twin Viewer"
+version                  = "0.1.0"
+add_layers               = "Yes"
+selected_layers          = ["[omni_default_streaming]: Omniverse Kit App Streaming (Default)"]
+
+[omni_usd_viewer.extensions]
+[omni_usd_viewer.extensions.omni_usd_viewer_setup]
+extension_name         = "axel.robot_twin_viewer_setup"
+extension_display_name = "Robot Twin Viewer Setup Extension"
+version                = "0.1.0"
+
+[omni_usd_viewer.extensions.omni_usd_viewer_messaging]
+extension_name         = "axel.robot_twin_viewer_messaging"
+extension_display_name = "Robot Twin Viewer Messaging Extension"
+version                = "0.1.0"
+
+[omni_usd_viewer.applications]
+[omni_usd_viewer.applications.omni_default_streaming]
+version = "0.1.0"

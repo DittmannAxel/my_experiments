@@ -210,6 +210,41 @@ services:
     networks:
       - stack
 
+  # Phase 4 — Omniverse Kit (USD Viewer with WebRTC streaming).
+  # Image is built out-of-band via the kit-app-template's
+  # `./repo.sh package_container --image-tag axel/robot_twin_viewer:0.1.0`,
+  # then this service references it. See omniverse-kit/README.md.
+  # GPU 1 only — GPU 0 is reserved for vLLM (Nemotron Nano 8B).
+  omniverse-kit:
+    image: ${OMNIVERSE_KIT_IMAGE:-axel/robot_twin_viewer:0.1.0}
+    container_name: rt-omniverse
+    restart: unless-stopped
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=1
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      # Optional override args for the streaming app's entrypoint.
+      - OMNI_KIT_ALLOW_ROOT=1
+      - ACCEPT_EULA=Y
+      - PRIVACY_CONSENT=Y
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["1"]
+              capabilities: [gpu]
+    volumes:
+      - usd-stage:/stage:ro
+    expose:
+      # HTTP signaling port (omni.kit.livestream.app default).
+      - "8011"
+    ports:
+      # WebRTC media — UDP, must be host-published, NOT proxied via Traefik.
+      - "47995-48005:47995-48005/udp"
+    networks:
+      - stack
+
 networks:
   stack:
     name: stack
