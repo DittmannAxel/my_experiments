@@ -64,7 +64,9 @@ class Simulator:
         while not self._stop.is_set():
             tick_start = time.monotonic()
 
-            # Pull anomaly state from the OPC UA variable too (Node-RED can flip it).
+            # Pull anomaly state from the OPC UA variable too (the dashboard's
+            # "Inject" button or any external client can flip it via the
+            # InjectAnomaly method).
             try:
                 opc_anomaly = await self.addr.anomaly_injected.read_value()
                 if opc_anomaly and opc_anomaly != self.anomaly_name:

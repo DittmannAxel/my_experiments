@@ -41,7 +41,7 @@
 <body>
   <header>
     <h1>Axel Robot Twin PoC</h1>
-    <div class="sub">OPC UA → OpenUSD • Microsoft Agent Framework • vLLM • NVIDIA Omniverse Kit</div>
+    <div class="sub">OPC UA → OpenUSD • OpenAI tool calling against vLLM • NVIDIA Omniverse Kit</div>
   </header>
   <main>
     <div style="margin-bottom: 24px;">
@@ -56,11 +56,7 @@
     <div class="grid">
       <a class="card" href="/dashboard/" target="_blank" rel="noopener">
         <div class="title">🤖 Robotics Dashboard <span class="badge" data-svc="dashboard"></span></div>
-        <div class="desc">Custom dark-theme operator console — gauges, motor temps, HITL approval.</div>
-      </a>
-      <a class="card" href="/nodered/" target="_blank" rel="noopener">
-        <div class="title">Node-RED Editor <span class="badge" data-svc="nodered"></span></div>
-        <div class="desc">Flow editor for the legacy Dashboard 2.0 view.</div>
+        <div class="desc">Operator console — gauges, motor temps, Ask the Spec, HITL approval.</div>
       </a>
       <a class="card" href="/grafana/" target="_blank" rel="noopener">
         <div class="title">Grafana <span class="badge" data-svc="grafana"></span></div>
@@ -84,7 +80,6 @@
     // landing path returns 2xx within 2 s. Unreachable = stays grey.
     const probes = {
       dashboard: "/dashboard/api/health",
-      nodered: "/nodered/",
       grafana: "/grafana/api/health",
       usd: "/usd/",
       spec: "/spec/health",
@@ -111,9 +106,9 @@
       const msg = document.getElementById("inject-msg");
       msg.textContent = "Injecting...";
       try {
-        const r = await fetch("/nodered/api/inject-anomaly", { method: "POST" });
+        const r = await fetch("/dashboard/api/inject-anomaly", { method: "POST" });
         if (r.ok) {
-          msg.textContent = "Anomaly injected — watch axis 4 motor temp.";
+          msg.textContent = "Anomaly injected — watch axis 4 motor temp in /dashboard/.";
         } else {
           msg.textContent = "Failed (" + r.status + "). Use scripts/demo-anomaly.sh on the host.";
         }

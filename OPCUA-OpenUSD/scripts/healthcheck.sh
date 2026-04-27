@@ -20,10 +20,10 @@ probe() {
 
 echo "Healthcheck — host=$HOST"
 probe "landing"      "https://$HOST/"                              "2.."
-probe "nodered"      "https://$HOST/nodered/"                      "2..|3.."
-probe "nodered-ui"   "https://$HOST/nodered/dashboard/"            "2..|3.."
+probe "dashboard"    "https://$HOST/dashboard/api/health"          "2.."
 probe "grafana"      "https://$HOST/grafana/api/health"            "2.."
 probe "usd-signal"   "https://$HOST/usd/"                          "2..|3..|4.."
+probe "stream-view"  "http://$HOST:8082/"                          "2.."
 probe "spec-http"    "https://$HOST/spec/health"                   "2.."
 ## opcua-tcp is checked below via /dev/tcp instead of curl.
 

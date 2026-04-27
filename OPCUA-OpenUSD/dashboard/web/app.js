@@ -338,11 +338,7 @@ async function askSpec(question) {
   if (empty) empty.remove();
 
   askThread.appendChild(renderQuestion(q));
-  const aHolder = renderAnswer("…thinking", []);
-  aHolder.querySelector(".ask-msg-a, .ask-msg-a")?.classList.add("pending");
-  aHolder.firstChild.nodeValue = "";
-  const pending = el("span", { className: "pending" }, ["…thinking"]);
-  aHolder.insertBefore(pending, aHolder.firstChild);
+  const aHolder = el("div", { className: "ask-msg-a" }, ["…thinking"]);
   askThread.appendChild(aHolder);
   askThread.scrollTop = askThread.scrollHeight;
 

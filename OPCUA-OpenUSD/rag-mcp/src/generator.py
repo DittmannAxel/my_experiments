@@ -11,7 +11,7 @@ from .retriever import Chunk
 log = logging.getLogger("generator")
 
 VLLM_BASE_URL = os.environ.get("VLLM_BASE_URL", "http://host.docker.internal:8000/v1")
-VLLM_MODEL = os.environ.get("VLLM_MODEL", "Qwen/Qwen3.6-35B-A3B")
+VLLM_MODEL = os.environ.get("VLLM_MODEL", "nvidia/Llama-3.1-Nemotron-Nano-8B-v1")
 
 SYSTEM_PROMPT = (
     "You are an OPC UA specification expert. Answer the user's question using "

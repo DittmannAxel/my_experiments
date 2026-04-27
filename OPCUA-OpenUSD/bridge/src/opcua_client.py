@@ -31,10 +31,6 @@ class Snapshot:
     joint_angles_deg: dict[int, float]
     motor_temps_c: dict[int, float]
     program_state: int | None
-    last_change_ts: float = 0.0
-
-    def is_dirty_since(self, ts: float) -> bool:
-        return self.last_change_ts > ts
 
 
 class _SubHandler:
@@ -54,7 +50,6 @@ class _SubHandler:
         else:
             try:
                 setter(val)
-                self.snap.last_change_ts = time.monotonic()
                 self._seen += 1
             except Exception:
                 log.exception("setter for %s failed", nid)

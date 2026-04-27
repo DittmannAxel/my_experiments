@@ -59,4 +59,4 @@ if [[ -z "$RECO" ]]; then
 fi
 
 echo
-echo "5. Demo complete. Approve via Node-RED at https://${HOST}/nodered/dashboard/"
+echo "5. Demo complete. Approve in the Robotics Dashboard at https://${HOST}/dashboard/"

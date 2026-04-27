@@ -1,9 +1,11 @@
 """Tool-calling-driven advisory agent.
 
-Uses the OpenAI SDK pointed at the bare-metal vLLM (Qwen3.6-35B-A3B) which has
-tool calling enabled via --tool-call-parser qwen3_xml. Microsoft Agent
-Framework would be the BUILD.md preference, but plain OpenAI tool calling is
-functionally equivalent for the PoC and avoids a pre-release dependency.
+Uses the OpenAI SDK pointed at the bare-metal vLLM (Llama-3.1-Nemotron-Nano-8B-v1
+by default; see VLLM_MODEL). vLLM is launched with
+`--enable-auto-tool-choice --tool-call-parser llama3_json` so the model
+returns proper `tool_calls` on the OpenAI-compatible endpoint. The directory
+name `maf-agent/` is kept for git history; this is plain OpenAI tool calling,
+not the Microsoft Agent Framework.
 """
 from __future__ import annotations
 
@@ -20,7 +22,7 @@ from .anomaly_detector import AnomalyEvent
 log = logging.getLogger("agent")
 
 VLLM_BASE_URL = os.environ.get("VLLM_BASE_URL", "http://host.docker.internal:8000/v1")
-VLLM_MODEL = os.environ.get("VLLM_MODEL", "Qwen/Qwen3.6-35B-A3B")
+VLLM_MODEL = os.environ.get("VLLM_MODEL", "nvidia/Llama-3.1-Nemotron-Nano-8B-v1")
 SYSTEM_PROMPT = Path(os.environ.get("PROMPTS_DIR", "/app/prompts")).joinpath("system.md").read_text()
 
 TOOL_SCHEMAS = [

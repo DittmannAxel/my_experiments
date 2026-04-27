@@ -43,11 +43,11 @@ async def write_recommendation_to_opcua(
     }
     blob = json.dumps(payload, ensure_ascii=False)
 
-    async with Client(url=OPCUA_ENDPOINT) as client:
-        # Use authenticated session so we have write rights.
-        client.set_user(OPCUA_USER)
-        client.set_password(OPCUA_PASSWORD)
-        await client.connect()  # not needed inside async-with but harmless
+    # Use authenticated session so we have write rights.
+    client = Client(url=OPCUA_ENDPOINT)
+    client.set_user(OPCUA_USER)
+    client.set_password(OPCUA_PASSWORD)
+    async with client:
         ns = await client.get_namespace_index("urn:axel:robot:recommendations")
         node = client.get_node(f"ns={ns};s=RobotRecommendations.ActiveRecommendation")
         await node.write_value(ua.Variant(blob, ua.VariantType.String))

@@ -58,18 +58,6 @@ services:
     networks:
       - stack
 
-  opcua-nodered:
-    build: ./opcua-nodered
-    container_name: rt-nodered
-    restart: unless-stopped
-    depends_on:
-      opcua-server:
-        condition: service_healthy
-    networks:
-      - stack
-    # No /data volume on purpose — flows.json + settings.js are baked
-    # into the image so the dashboard is reproducible across rebuilds.
-
   bridge:
     build: ./bridge
     container_name: rt-bridge
@@ -184,7 +172,7 @@ services:
     environment:
       - PGVECTOR_DSN=postgresql://rag:rag@pgvector:5432/rag
       - VLLM_BASE_URL=${VLLM_BASE_URL:-http://host.docker.internal:8000/v1}
-      - VLLM_MODEL=${VLLM_MODEL:-Qwen/Qwen3.6-35B-A3B}
+      - VLLM_MODEL=${VLLM_MODEL:-nvidia/Llama-3.1-Nemotron-Nano-8B-v1}
       - PORT=49322
     networks:
       - stack
@@ -206,7 +194,7 @@ services:
       - OPCUA_PASSWORD=${OPCUA_PASSWORD:-changeme-please}
       - RAG_URL=http://rag-mcp:49322/api/specification/query
       - VLLM_BASE_URL=${VLLM_BASE_URL:-http://host.docker.internal:8000/v1}
-      - VLLM_MODEL=${VLLM_MODEL:-Qwen/Qwen3.6-35B-A3B}
+      - VLLM_MODEL=${VLLM_MODEL:-nvidia/Llama-3.1-Nemotron-Nano-8B-v1}
     networks:
       - stack
 

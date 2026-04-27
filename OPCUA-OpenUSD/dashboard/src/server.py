@@ -202,45 +202,36 @@ async def temp_history() -> dict:
 @app.post("/api/inject-anomaly")
 async def inject_anomaly() -> dict:
     """Trigger axis4_overheat via OPC UA method."""
-    try:
-        async with Client(url=OPCUA_ENDPOINT) as c:
-            ns = await c.get_namespace_index("urn:axel:robot")
-            tc = c.get_node(f"ns={ns};s=RobotController.TaskControl")
-            method = c.get_node(f"ns={ns};s=RobotController.TaskControl.InjectAnomaly")
-            await tc.call_method(method, ua.Variant("axis4_overheat", ua.VariantType.String))
-        return {"status": "ok"}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
+    async with Client(url=OPCUA_ENDPOINT) as c:
+        ns = await c.get_namespace_index("urn:axel:robot")
+        tc = c.get_node(f"ns={ns};s=RobotController.TaskControl")
+        method = c.get_node(f"ns={ns};s=RobotController.TaskControl.InjectAnomaly")
+        await tc.call_method(method, ua.Variant("axis4_overheat", ua.VariantType.String))
+    return {"status": "ok"}
 
 
 @app.post("/api/clear-anomaly")
 async def clear_anomaly() -> dict:
-    try:
-        async with Client(url=OPCUA_ENDPOINT) as c:
-            ns = await c.get_namespace_index("urn:axel:robot")
-            tc = c.get_node(f"ns={ns};s=RobotController.TaskControl")
-            method = c.get_node(f"ns={ns};s=RobotController.TaskControl.InjectAnomaly")
-            await tc.call_method(method, ua.Variant("", ua.VariantType.String))
-        return {"status": "ok"}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
+    async with Client(url=OPCUA_ENDPOINT) as c:
+        ns = await c.get_namespace_index("urn:axel:robot")
+        tc = c.get_node(f"ns={ns};s=RobotController.TaskControl")
+        method = c.get_node(f"ns={ns};s=RobotController.TaskControl.InjectAnomaly")
+        await tc.call_method(method, ua.Variant("", ua.VariantType.String))
+    return {"status": "ok"}
 
 
 @app.post("/api/approve")
 async def approve(approved: bool = True) -> dict:
-    try:
-        async with Client(url=OPCUA_ENDPOINT) as c:
-            ns_r = await c.get_namespace_index("urn:axel:robot:recommendations")
-            obj = c.get_node(f"ns={ns_r};s=RobotRecommendations")
-            method = c.get_node(f"ns={ns_r};s=RobotRecommendations.ApproveRecommendation")
-            await obj.call_method(
-                method,
-                ua.Variant("current", ua.VariantType.String),
-                ua.Variant(bool(approved), ua.VariantType.Boolean),
-            )
-        return {"status": "ok", "approved": approved}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
+    async with Client(url=OPCUA_ENDPOINT) as c:
+        ns_r = await c.get_namespace_index("urn:axel:robot:recommendations")
+        obj = c.get_node(f"ns={ns_r};s=RobotRecommendations")
+        method = c.get_node(f"ns={ns_r};s=RobotRecommendations.ApproveRecommendation")
+        await obj.call_method(
+            method,
+            ua.Variant("current", ua.VariantType.String),
+            ua.Variant(bool(approved), ua.VariantType.Boolean),
+        )
+    return {"status": "ok", "approved": approved}
 
 
 @app.websocket("/ws")

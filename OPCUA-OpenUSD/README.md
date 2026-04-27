@@ -20,7 +20,7 @@ flowchart LR
     subgraph Stack["Docker network: stack"]
         Traefik["Traefik<br/>TLS termination"]
         Landing["landing"]
-        Dashboard["dashboard<br/>(Robotics Dashboard)"]
+        Dashboard["dashboard<br/>(Robotics Dashboard +<br/>Ask the Spec)"]
         StreamView["stream-viewer<br/>(WebRTC client)"]
         Grafana["grafana / influxdb / telegraf"]
         RAG["rag-mcp / spec"]
@@ -62,7 +62,6 @@ flowchart LR
 | `https://stack.local/grafana/` | Grafana time-series | ✓ |
 | `https://stack.local/spec/health` | RAG-MCP health | ✓ |
 | `https://stack.local/spec/api/specification/query` | RAG-MCP HTTP API | ✓ |
-| `https://stack.local/nodered/` | Node-RED admin (flow editor only — superseded by `/dashboard/`) | ✓ |
 | `http://stack.local:8082/` | NVIDIA WebRTC viewer (loads the Kit stream) | ✓ |
 | `opc.tcp://stack.local:4840/axel/robot` | OPC UA endpoint | ✓ |
 
@@ -222,7 +221,7 @@ docker compose up -d                     # ≈10–15 min on first run (RAG embe
 
 - [x] Phase 0 — Scaffolding (Traefik + landing page)
 - [x] Phase 1a — OPC UA server (asyncua, simulator, anomaly injection)
-- [x] Phase 1b — Robotics Dashboard (custom, primary operator UI)
+- [x] Phase 1b — Robotics Dashboard (custom, primary operator UI; Ask-the-Spec chat panel)
 - [x] Phase 2 — Bridge + USD authoring (≤200 ms write latency)
 - [x] Phase 3 — InfluxDB + Telegraf + Grafana
 - [x] Phase 4 — Omniverse Kit + WebRTC stream viewer
@@ -240,7 +239,6 @@ OPCUA-OpenUSD/
 ├── landing-page/               # nginx-served entry page
 ├── dashboard/                  # Robotics Dashboard (primary operator UI)
 ├── opcua-server/               # asyncua robot simulator
-├── opcua-nodered/              # legacy Node-RED image (flow editor)
 ├── bridge/                     # OPC UA → USD authoring
 ├── usd-assets/                 # stage.usda, robot.usda, cell.usda, live.usda
 ├── telegraf/                   # OPC UA → InfluxDB

@@ -56,7 +56,7 @@ class AddressSpace:
 
 
 def _nid(ns: int, path: str) -> ua.NodeId:
-    """Stable string NodeId so external clients (Node-RED, Telegraf) can
+    """Stable string NodeId so external clients (dashboard, Telegraf, agent) can
     address nodes by name instead of relying on auto-allocated numeric IDs."""
     return ua.NodeId(path, ns, ua.NodeIdType.String)
 
