@@ -9,14 +9,13 @@ from dataclasses import dataclass, field
 log = logging.getLogger("anomaly")
 
 THRESHOLD_C = 90.0
-# Tightened for live-demo cadence and to interleave with the simulator's
-# safety interlock (also at 90 °C): the moment temp crosses 90, the cell
-# auto-stops (ProgramState 2 → 4) and motor cooling kicks in immediately at
-# THERMAL_C·(95-22) ≈ 4.4 °C/s, so the value drops back below 90 within
-# ~1.1 s. A 0.5 s sustained-above window comfortably fires the agent inside
-# that envelope while still suppressing single-sample noise. 30 s cooldown
-# lets the operator repeat the demo without a two-minute wait.
-DURATION_S = 0.5
+# Demo cadence with safety interlock at the same threshold: the simulator
+# stops the cell the moment temp crosses 90 °C, after which motor cooling
+# (~0.4 °C per 100 ms tick) drops the value back below 90 within a single
+# observation. A "sustained-above" window therefore can't trip — by the
+# second tick the motor is already cooling. Fire on the first observation
+# above the threshold and use COOLDOWN_S as the only debouncer. 30 s
+# cooldown is short enough for live-demo iteration.
 COOLDOWN_S = 30.0
 
 
@@ -47,11 +46,11 @@ class TemperatureAnomalyDetector:
         st = self.state[axis]
 
         if motor_temp_c >= THRESHOLD_C:
+            # Track the first-crossing time for telemetry (duration_above in
+            # the event) but don't gate firing on it — see module docstring.
             if st.above_since is None:
                 st.above_since = now
-            elif (now - st.above_since) >= DURATION_S \
-                 and (now - st.last_fired) >= COOLDOWN_S:
-                # Fire.
+            if (now - st.last_fired) >= COOLDOWN_S:
                 ev = AnomalyEvent(
                     axis=axis,
                     metric="motor_temperature",
@@ -60,8 +59,7 @@ class TemperatureAnomalyDetector:
                     duration_above=now - st.above_since,
                 )
                 st.last_fired = now
-                log.warning("ANOMALY axis=%d temp=%.2f duration=%.1fs",
-                            axis, motor_temp_c, ev.duration_above)
+                log.warning("ANOMALY axis=%d temp=%.2f", axis, motor_temp_c)
                 try:
                     self.queue.put_nowait(ev)
                 except asyncio.QueueFull:
