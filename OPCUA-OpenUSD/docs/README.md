@@ -4,7 +4,7 @@ Static assets for the top-level `OPCUA-OpenUSD/README.md`.
 
 ## Files
 
-- `architecture.jpg` — system architecture diagram (1607×979, ≈ 200 KB).
+- `system-architecture.jpg` — system architecture diagram (1536×1024, ≈ 300 KB).
 - `dashboard-hero.jpg` — Robotics Dashboard with live gauges, joint summary,
   and motor-temperature chart (axis 4 visibly hot during a demo run). 1280×800.
 - `dashboard-ask-the-spec.jpg` — lower half of the Robotics Dashboard showing

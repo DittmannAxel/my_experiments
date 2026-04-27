@@ -8,7 +8,7 @@ Omniverse Kit view**. All services run from one `docker compose up`.
 
 ## Architecture
 
-![System architecture](docs/architecture.jpg)
+![System architecture](docs/system-architecture.jpg)
 
 The Mac browser drives two flows: HTTPS to Traefik for the dashboard, Grafana,
 landing page, and spec API; plain HTTP to `stream-viewer` (port 8082), which
