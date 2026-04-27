@@ -25,6 +25,7 @@ http:
     nodered:
       rule: "Host(`stack.local`) && PathPrefix(`/nodered`)"
       service: nodered
+      priority: 100
       entryPoints: [websecure]
       tls: {}
 
