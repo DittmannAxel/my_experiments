@@ -7,7 +7,7 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 # Pull the OPC UA spec source. Public, shallow, pinned by ref via build-arg.
-ARG UA_SPEC_REF=main
+ARG UA_SPEC_REF=master
 RUN git clone --depth=1 --branch ${UA_SPEC_REF} \
         https://github.com/OPCFoundation/UA-for-AI-Prototype.git \
         /app/ua-spec-source \
