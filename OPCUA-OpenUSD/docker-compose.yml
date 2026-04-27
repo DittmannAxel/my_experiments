@@ -4,7 +4,7 @@ name: robot-twin-poc
 
 services:
   traefik:
-    image: traefik:v3.1
+    image: traefik:v3.3
     container_name: rt-traefik
     restart: unless-stopped
     command: []
