@@ -14,8 +14,10 @@ source ~/miniconda3/bin/activate vllm
 
 export CUDA_VISIBLE_DEVICES=0
 export VLLM_USE_V1=1
-# FlashInfer FP8 MoE kernels are required for this model on Hopper / Ada.
-export VLLM_USE_FLASHINFER_MOE_FP8=1
+# Note: VLLM_USE_FLASHINFER_MOE_FP8=1 in the model card targets Hopper
+# (sm_90). On Ada Lovelace (RTX 6000 Ada, sm_89) it raises
+# NotImplementedError because there is no compatible FlashInfer FP8 MoE
+# backend yet. Leave it unset and let vLLM pick the cutlass FP8 path.
 
 MODEL_DIR="${MODEL_DIR:-$HOME/dev/models/Nemotron-3-Nano-30B-A3B-FP8}"
 SERVED_NAME="${SERVED_NAME:-nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-FP8}"
