@@ -44,6 +44,15 @@
     <div class="sub">OPC UA → OpenUSD • Microsoft Agent Framework • vLLM • NVIDIA Omniverse Kit</div>
   </header>
   <main>
+    <div style="margin-bottom: 24px;">
+      <button id="inject-btn" style="
+        background: var(--err); color: #fff; border: 0;
+        padding: 12px 18px; border-radius: 8px; cursor: pointer;
+        font-size: 14px; font-weight: 600;">
+        ⚠️ Inject Anomaly (axis 4 overheat)
+      </button>
+      <span id="inject-msg" style="margin-left: 12px; color: var(--muted);"></span>
+    </div>
     <div class="grid">
       <a class="card" href="/nodered/dashboard/page/live" target="_blank" rel="noopener">
         <div class="title">Node-RED Dashboard <span class="badge" data-svc="nodered"></span></div>
@@ -88,6 +97,25 @@
     }
     function tick() { for (const [s, u] of Object.entries(probes)) probe(s, u); }
     tick(); setInterval(tick, 5000);
+
+    // Inject anomaly button — calls Node-RED dashboard's HTTP-IN endpoint at
+    // /nodered/api/inject-anomaly which is wired to call the OPC UA method.
+    // (Wiring is added in flows.json; if Node-RED is offline, fall back to
+    //  showing instructions.)
+    document.getElementById("inject-btn").addEventListener("click", async () => {
+      const msg = document.getElementById("inject-msg");
+      msg.textContent = "Injecting...";
+      try {
+        const r = await fetch("/nodered/api/inject-anomaly", { method: "POST" });
+        if (r.ok) {
+          msg.textContent = "Anomaly injected — watch axis 4 motor temp.";
+        } else {
+          msg.textContent = "Failed (" + r.status + "). Use scripts/demo-anomaly.sh on the host.";
+        }
+      } catch (e) {
+        msg.textContent = "Network error. Use scripts/demo-anomaly.sh on the host.";
+      }
+    });
   </script>
 </body>
 </html>

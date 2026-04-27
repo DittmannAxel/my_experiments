@@ -35,16 +35,28 @@ def _vec_literal(v: list[float]) -> str:
 
 
 def _extract_chunks(path: Path) -> list[dict]:
-    """Try to load rag-chunks.json; tolerate a few common shapes."""
+    """Load rag-chunks.json. UA-for-AI-Prototype's shape is:
+        {"Title": "Part N - Foo", "Chunks": [{"Id":..., "Header":..., "Content":...}, ...]}
+    We also tolerate a few alternate shapes for forward-compat.
+    """
     raw = json.loads(path.read_text(encoding="utf-8"))
     if isinstance(raw, list):
-        return raw
+        return [_normalize(c) for c in raw]
     if isinstance(raw, dict):
-        for k in ("chunks", "items", "data"):
+        for k in ("Chunks", "chunks", "items", "data"):
             if k in raw and isinstance(raw[k], list):
-                return raw[k]
+                return [_normalize(c) for c in raw[k]]
     log.warning("Unknown shape in %s; skipping", path)
     return []
+
+
+def _normalize(chunk: dict) -> dict:
+    """Map upstream's PascalCase keys to our snake_case schema."""
+    return {
+        "id":      chunk.get("Id")     or chunk.get("id")     or chunk.get("chunk_id"),
+        "title":   chunk.get("Header") or chunk.get("title"),
+        "content": chunk.get("Content") or chunk.get("content") or chunk.get("text") or "",
+    }
 
 
 async def populate_once():
@@ -71,15 +83,15 @@ async def populate_once():
             log.info("Embedding %d chunks from %s ...", len(chunks), rel)
             for i in range(0, len(chunks), BATCH_SIZE):
                 batch = chunks[i : i + BATCH_SIZE]
-                texts = [c.get("content") or c.get("text") or "" for c in batch]
+                texts = [c["content"] for c in batch]
                 vecs = embedder.embed_batch(texts)
                 rows = []
                 for c, v in zip(batch, vecs):
                     rows.append((
                         rel,
-                        str(c.get("id") or c.get("chunk_id") or f"{rel}-{total}"),
+                        str(c.get("id") or f"{rel}-{total}"),
                         c.get("title"),
-                        c.get("content") or c.get("text") or "",
+                        c["content"],
                         _vec_literal(v),
                     ))
                     total += 1
