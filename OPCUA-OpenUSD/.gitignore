@@ -27,6 +27,22 @@ opcua-server/certs/
 usd-stage/
 *.usdc
 
+# Database snapshots / dumps — never commit. pgvector data lives in
+# the Docker volume `pgvector-data`, the rag-chunks corpus is fetched
+# from OPCFoundation/UA-for-AI-Prototype at image-build time.
+*.db
+*.sqlite
+*.sqlite3
+*.dump
+*.parquet
+*.feather
+rag-chunks/
+spec-chunks/
+embeddings/
+*.npy
+*.pkl
+*.bin
+
 # Docker / env
 .env
 .env.local

@@ -20,7 +20,7 @@ import os
 from pathlib import Path
 from typing import Annotated, Any
 
-from agent_framework import ChatAgent, tool
+from agent_framework import Agent, tool
 from agent_framework.openai import OpenAIChatClient
 
 from . import tools as ops
@@ -80,10 +80,10 @@ async def write_recommendation_to_opcua(
 
 
 _chat_client: OpenAIChatClient | None = None
-_agent: ChatAgent | None = None
+_agent: Agent | None = None
 
 
-def _get_agent() -> ChatAgent:
+def _get_agent() -> Agent:
     global _chat_client, _agent
     if _agent is None:
         _chat_client = OpenAIChatClient(
@@ -91,7 +91,7 @@ def _get_agent() -> ChatAgent:
             base_url=VLLM_BASE_URL,
             model_id=VLLM_MODEL,
         )
-        _agent = ChatAgent(
+        _agent = Agent(
             name="robot-twin-agent",
             chat_client=_chat_client,
             instructions=SYSTEM_PROMPT,

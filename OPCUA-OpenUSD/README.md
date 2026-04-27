@@ -32,8 +32,8 @@ flowchart LR
     end
 
     Browser -->|HTTPS| Traefik
-    Browser -->|HTTP :8082| StreamView
-    Browser -->|WebRTC :49100 + :47995-48005/UDP| Kit
+    Browser -->|HTTP :8082 page load| StreamView
+    StreamView -.->|WebRTC signaling :49100<br/>+ media :47995-48005/UDP| Kit
     Traefik --> Landing
     Traefik --> Dashboard
     Traefik --> Grafana
@@ -47,7 +47,7 @@ flowchart LR
     Agent -->|writes recommendation| OPCUA
     Agent <--> RAG
     RAG <--> PG
-    Agent -.->|OpenAI tool calling| vLLM
+    Agent -.->|MS Agent Framework<br/>+ OpenAI tool calling| vLLM
     RAG -.->|generation| vLLM
 
     Dashboard --> OPCUA
@@ -178,19 +178,32 @@ The dashboard at `/dashboard/` is the primary operator UI:
   Approve / Reject card appears; clicking Approve calls `ApproveRecommendation`
   on the OPC UA server which applies the recommended action
 
-## Advisory agent (note on framework)
+## Advisory agent
 
-The agent (service `agent`, code in `maf-agent/`) was originally specified to
-use the [Microsoft Agent Framework](https://github.com/microsoft/agent-framework)
-(`agent-framework[openai] --pre`). For the PoC we use **plain OpenAI tool
-calling** with `openai.AsyncOpenAI` pointed at the bare-metal vLLM. vLLM is
-launched with `--enable-auto-tool-choice --tool-call-parser llama3_json`, which
-is what makes Llama-3.1-Nemotron-Nano-8B return `tool_calls` on the
-OpenAI-compatible endpoint. Functionally equivalent to MAF for this two-tool
-flow (`query_specification`, `write_recommendation_to_opcua`); the directory
-name `maf-agent/` is left for git history.
+The agent (service `maf-agent`) is built on the
+[Microsoft Agent Framework](https://github.com/microsoft/agent-framework)
+(GA, `agent-framework` 1.2.0). It uses `agent_framework.Agent` with the
+`OpenAIChatClient` pointed at the bare-metal vLLM. vLLM is launched with
+`--enable-auto-tool-choice --tool-call-parser llama3_json`, which is what
+makes Llama-3.1-Nemotron-Nano-8B return `tool_calls` on the
+OpenAI-compatible endpoint.
 
-The agent has the same advisory contract MAF would enforce:
+Two `@tool` functions:
+
+- `query_specification(question, part_filter)` — proxies through the
+  `rag-mcp` HTTP API (`/spec/api/specification/query`) to retrieve
+  spec-grounded answers with `[Part#chunk]` citations
+- `write_recommendation_to_opcua(title, rationale, actions, spec_citation)`
+  — opens an authenticated `asyncua` client to the OPC UA server and
+  writes the recommendation into the `RobotRecommendations.ActiveRecommendation`
+  variable
+
+Both tools are `approval_mode="never_require"`. The HITL is **out-of-band**:
+the operator clicks Approve in the Robotics Dashboard, which calls the
+OPC UA `ApproveRecommendation` method — that's what actually applies the
+recommended state change. The agent's role is strictly advisory.
+
+The agent has the contract:
 
 - never writes to process variables (axis positions, temperatures, etc.)
 - only publishes to `RobotRecommendations`
