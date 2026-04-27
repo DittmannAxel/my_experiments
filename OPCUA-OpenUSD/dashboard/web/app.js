@@ -330,6 +330,11 @@ function renderAnswer(text, citations) {
   return a;
 }
 
+// `/spec` is the Traefik-stripped path that proxies to the rag-mcp service.
+// It's cross-route from `/dashboard/`, so the URL must stay absolute.
+const SPEC_URL = "/spec/api/specification/query";
+const SPEC_TIMEOUT_MS = 90_000;
+
 async function askSpec(question) {
   if (!question || !question.trim()) return;
   const q = question.trim();
@@ -338,19 +343,36 @@ async function askSpec(question) {
   if (empty) empty.remove();
 
   askThread.appendChild(renderQuestion(q));
-  const aHolder = el("div", { className: "ask-msg-a" }, ["…thinking"]);
+  const aHolder = el("div", { className: "ask-msg-a ask-pending" }, [
+    el("span", { className: "spinner" }),
+    el("span", { className: "ask-status" }, ["Asking the spec… 0.0 s"]),
+  ]);
   askThread.appendChild(aHolder);
   askThread.scrollTop = askThread.scrollHeight;
 
   askBtn.disabled = true;
   askInput.disabled = true;
+  const t0 = performance.now();
+  const status = aHolder.querySelector(".ask-status");
+  const tick = setInterval(() => {
+    const dt = ((performance.now() - t0) / 1000).toFixed(1);
+    if (status) status.textContent = `Asking the spec… ${dt} s`;
+  }, 200);
+
+  // Hard timeout — never let the panel look hung.
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort("timeout"), SPEC_TIMEOUT_MS);
+
   try {
-    const r = await fetch("/spec/api/specification/query", {
+    const r = await fetch(SPEC_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ question: q, k: 4 }),
+      signal: ctrl.signal,
     });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const d = await r.json();
+    aHolder.classList.remove("ask-pending");
     aHolder.replaceChildren();
     aHolder.appendChild(document.createTextNode(d.answer || "(no answer)"));
     if (d.citations && d.citations.length) {
@@ -364,8 +386,14 @@ async function askSpec(question) {
       aHolder.appendChild(wrap);
     }
   } catch (e) {
-    aHolder.replaceChildren(document.createTextNode(`Error: ${e}`));
+    aHolder.classList.remove("ask-pending");
+    const why = (e && e.name === "AbortError")
+      ? `No answer after ${SPEC_TIMEOUT_MS / 1000} s — the model is overloaded. Try again or simplify the question.`
+      : `Error: ${e && e.message ? e.message : e}`;
+    aHolder.replaceChildren(document.createTextNode(why));
   } finally {
+    clearTimeout(timer);
+    clearInterval(tick);
     askBtn.disabled = false;
     askInput.disabled = false;
     askInput.value = "";
@@ -379,16 +407,47 @@ askForm.addEventListener("submit", (e) => {
   askSpec(askInput.value);
 });
 
-// Click the example chips to auto-submit them.
+// Click the example chips to auto-submit them. Guard against double-submits
+// while a previous request is still in flight (askBtn is disabled during it).
 askThread.addEventListener("click", (e) => {
   const t = e.target;
-  if (t && t.tagName === "EM") askSpec(t.textContent.replace(/^"|"$/g, ""));
+  if (t && t.tagName === "EM" && !askBtn.disabled) {
+    askSpec(t.textContent.replace(/^"|"$/g, ""));
+  }
 });
-document.getElementById("approve-btn").addEventListener("click", async () => {
-  await fetch(`${basePath()}/api/approve?approved=true`, { method: "POST" });
-});
-document.getElementById("reject-btn").addEventListener("click", async () => {
-  await fetch(`${basePath()}/api/approve?approved=false`, { method: "POST" });
-});
+async function decideRecommendation(approved) {
+  // Immediate visual feedback — the WebSocket snapshot will reflect the
+  // real state shortly, but the user gets a response within one frame.
+  const approveBtn = document.getElementById("approve-btn");
+  const rejectBtn = document.getElementById("reject-btn");
+  const label = approved ? "Approving…" : "Rejecting…";
+  approveBtn.disabled = true;
+  rejectBtn.disabled = true;
+  const target = approved ? approveBtn : rejectBtn;
+  const original = target.textContent;
+  target.textContent = label;
+  let failed = false;
+  try {
+    const r = await fetch(
+      `${basePath()}/api/approve?approved=${approved}`,
+      { method: "POST" },
+    );
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  } catch (e) {
+    failed = true;
+    target.textContent = `Failed: ${e.message || e}`;
+  } finally {
+    // Re-enable after a short beat (longer when the call failed, so the
+    // user actually has time to read the error before the label resets).
+    const restoreMs = failed ? 4000 : 1500;
+    setTimeout(() => {
+      approveBtn.disabled = false;
+      rejectBtn.disabled = false;
+      target.textContent = original;
+    }, restoreMs);
+  }
+}
+document.getElementById("approve-btn").addEventListener("click", () => decideRecommendation(true));
+document.getElementById("reject-btn").addEventListener("click", () => decideRecommendation(false));
 
 connect();
