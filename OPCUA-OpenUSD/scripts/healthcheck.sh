@@ -25,7 +25,7 @@ probe "nodered-ui"   "https://$HOST/nodered/dashboard/"            "2..|3.."
 probe "grafana"      "https://$HOST/grafana/api/health"            "2.."
 probe "usd-signal"   "https://$HOST/usd/"                          "2..|3..|4.."
 probe "spec-http"    "https://$HOST/spec/health"                   "2.."
-probe "opcua-tcp"    "tcp://$HOST:4840"                            "0.."   # filled in below
+## opcua-tcp is checked below via /dev/tcp instead of curl.
 
 # Plain TCP probe for OPC UA — uses bash /dev/tcp.
 if (echo > "/dev/tcp/${HOST}/4840") 2>/dev/null; then
