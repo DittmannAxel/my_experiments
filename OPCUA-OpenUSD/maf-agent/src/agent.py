@@ -107,18 +107,23 @@ async def handle_anomaly(ev: AnomalyEvent) -> None:
     ]
     log.info("Agent reasoning over anomaly axis=%d", ev.axis)
 
-    for step in range(8):
+    spec_query_count = 0
+    for step in range(12):
+        # After 2 spec queries, force the model to write a recommendation.
+        force_write = spec_query_count >= 2
         resp = await _llm().chat.completions.create(
             model=VLLM_MODEL,
             messages=messages,
             tools=TOOL_SCHEMAS,
-            tool_choice="auto",
+            tool_choice=(
+                {"type": "function", "function": {"name": "write_recommendation_to_opcua"}}
+                if force_write
+                else "auto"
+            ),
             temperature=0.2,
             max_tokens=2048,
-            # Disable chain-of-thought so the model produces tool_calls
-            # in the same response window. With thinking enabled, Qwen3
-            # uses up tokens before getting to the action.
-            extra_body={"chat_template_kwargs": {"enable_thinking": False}},
+            # Re-enable thinking so the model evaluates tool results
+            # between calls (improves convergence dramatically).
         )
         msg = resp.choices[0].message
 
@@ -140,6 +145,7 @@ async def handle_anomaly(ev: AnomalyEvent) -> None:
             log.info("Agent reasoning done (no tool calls): %s", (msg.content or "")[:240])
             return
 
+        wrote_reco = False
         # Execute each tool call and append its result.
         for tc in msg.tool_calls:
             try:
@@ -147,6 +153,10 @@ async def handle_anomaly(ev: AnomalyEvent) -> None:
             except json.JSONDecodeError:
                 args = {}
             log.info("Tool: %s args=%s", tc.function.name, args)
+            if tc.function.name == "query_specification":
+                spec_query_count += 1
+            if tc.function.name == "write_recommendation_to_opcua":
+                wrote_reco = True
             try:
                 tool_out = await _dispatch_tool(tc.function.name, args)
             except Exception as e:
@@ -157,5 +167,9 @@ async def handle_anomaly(ev: AnomalyEvent) -> None:
                 "tool_call_id": tc.id,
                 "content": tool_out,
             })
+
+        if wrote_reco:
+            log.info("Recommendation written; agent run done.")
+            return
 
     log.warning("Agent loop hit step cap without finishing.")
