@@ -8,6 +8,10 @@ services:
     container_name: rt-traefik
     restart: unless-stopped
     command: []
+    environment:
+      # Docker 29 daemon requires API >= 1.40; pin Traefik's client so it
+      # doesn't fall back to 1.24 when negotiation skips.
+      - DOCKER_API_VERSION=1.45
     ports:
       - "80:80"
       - "443:443"
