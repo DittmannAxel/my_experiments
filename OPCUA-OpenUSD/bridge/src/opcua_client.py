@@ -42,14 +42,33 @@ class _SubHandler:
     def __init__(self, snap: Snapshot, label_to_setter):
         self.snap = snap
         self.label_to_setter = label_to_setter
+        self._seen = 0
+        self._misses = 0
+        self._last_log = time.monotonic()
 
     def datachange_notification(self, node, val, data):  # noqa: ARG002
         nid = node.nodeid.to_string()
         setter = self.label_to_setter.get(nid)
         if setter is None:
-            return
-        setter(val)
-        self.snap.last_change_ts = time.monotonic()
+            self._misses += 1
+        else:
+            try:
+                setter(val)
+                self.snap.last_change_ts = time.monotonic()
+                self._seen += 1
+            except Exception:
+                log.exception("setter for %s failed", nid)
+        # Periodic liveness log so we can tell apart "no notifications" from
+        # "notifications arrive but routes nowhere".
+        now = time.monotonic()
+        if now - self._last_log > 30.0:
+            log.info(
+                "sub handler: %d routed, %d unrouted in last %.0fs (last nid=%s)",
+                self._seen, self._misses, now - self._last_log, nid,
+            )
+            self._seen = 0
+            self._misses = 0
+            self._last_log = now
 
 
 async def run_client(endpoint: str, snap: Snapshot, ns_uri: str = NS_PRIMARY):
