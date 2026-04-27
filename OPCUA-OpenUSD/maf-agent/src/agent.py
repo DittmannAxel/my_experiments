@@ -1,6 +1,6 @@
 """Microsoft Agent Framework advisory agent.
 
-Uses `agent-framework` (GA) with the OpenAIChatClient pointed at the
+Uses `agent-framework` (GA) with the OpenAIChatCompletionClient pointed at the
 bare-metal vLLM serving an OpenAI-compatible endpoint
 (default model: nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-FP8, served with
 `--tool-call-parser qwen3_coder` and the nano_v3 reasoning parser plugin).
@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Annotated, Any
 
 from agent_framework import Agent, tool
-from agent_framework.openai import OpenAIChatClient
+from agent_framework.openai import OpenAIChatCompletionClient
 
 from . import tools as ops
 from .anomaly_detector import AnomalyEvent
@@ -82,14 +82,14 @@ async def write_recommendation_to_opcua(
 # ─────────── Agent ───────────
 
 
-_chat_client: OpenAIChatClient | None = None
+_chat_client: OpenAIChatCompletionClient | None = None
 _agent: Agent | None = None
 
 
 def _get_agent() -> Agent:
     global _chat_client, _agent
     if _agent is None:
-        _chat_client = OpenAIChatClient(
+        _chat_client = OpenAIChatCompletionClient(
             model=VLLM_MODEL,
             api_key="not-used",
             base_url=VLLM_BASE_URL,
