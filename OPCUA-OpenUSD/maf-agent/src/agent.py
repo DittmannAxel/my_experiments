@@ -119,15 +119,23 @@ def _format_anomaly(ev: AnomalyEvent) -> str:
 
 
 async def handle_anomaly(ev: AnomalyEvent) -> None:
-    """One-shot agent run for an anomaly event."""
+    """One-shot agent run for an anomaly event.
+
+    Nemotron's reasoning trace alone runs ~300–500 tokens; the tool
+    arguments take another ~200; we set max_tokens=2048 to give the model
+    headroom for both. Temperature is low so the recommendation stays
+    deterministic across reruns.
+    """
     agent = _get_agent()
     log.info("Agent reasoning over anomaly axis=%d", ev.axis)
     try:
-        result = await agent.run(_format_anomaly(ev))
+        result = await agent.run(
+            _format_anomaly(ev),
+            options={"max_tokens": 2048, "temperature": 0.2},
+        )
     except Exception:
         log.exception("Agent run failed")
         return
 
-    # Log summary so operators see what the agent decided.
     final_text = getattr(result, "text", None) or ""
     log.info("Agent run done: %s", (final_text or "(no text)")[:240])
