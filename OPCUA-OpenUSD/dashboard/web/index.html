@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Robotics Dashboard</title>
+  <link rel="stylesheet" href="./style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="app">
+    <!-- ───────── Sidebar ───────── -->
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
+          <path fill="#76b900" d="M16 3 L24 8 L24 12 L20 12 L20 14 L26 14 L26 22 L20 22 L20 24 L24 24 L24 28 L8 28 L8 24 L12 24 L12 22 L6 22 L6 14 L12 14 L12 12 L8 12 L8 8 Z"/>
+        </svg>
+        <div>
+          <div class="brand-title">ROBOTICS<br/>DASHBOARD</div>
+          <div class="brand-sub"><span class="dot dot-live"></span>Live Monitoring</div>
+        </div>
+      </div>
+      <ul class="nav">
+        <li class="active"><span class="ico ico-grid"></span>Overview</li>
+        <li><span class="ico ico-joints"></span>Joints</li>
+        <li><span class="ico ico-temps"></span>Temperatures</li>
+        <li><span class="ico ico-status"></span>Status</li>
+        <li><span class="ico ico-alerts"></span>Alerts</li>
+        <li><span class="ico ico-logs"></span>Logs</li>
+        <li><span class="ico ico-settings"></span>Settings</li>
+      </ul>
+      <div class="sidebar-health">
+        <div class="health-label">SYSTEM HEALTH</div>
+        <div class="health-ring">
+          <svg viewBox="0 0 100 100" width="120" height="120">
+            <circle cx="50" cy="50" r="44" stroke="#1d2230" stroke-width="8" fill="none"/>
+            <circle id="health-arc" cx="50" cy="50" r="44" stroke="#22c55e" stroke-width="8"
+                    fill="none" stroke-linecap="round"
+                    stroke-dasharray="276.5" stroke-dashoffset="0"
+                    transform="rotate(-90 50 50)"/>
+          </svg>
+          <div class="health-pct"><span id="health-value">98</span><small>%</small><div class="health-tag">Healthy</div></div>
+        </div>
+        <div class="health-uptime"><span class="muted">Uptime</span><br/><span id="uptime">12d 4h 21m</span></div>
+      </div>
+      <div class="sidebar-version">v0.1.0 · stack.local</div>
+    </nav>
+
+    <!-- ───────── Main ───────── -->
+    <main class="main">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-left">
+          <h1>ROBOTICS DASHBOARD</h1>
+          <div class="header-sub"><span id="conn-dot" class="dot dot-live"></span><span id="conn-status">Connecting…</span></div>
+        </div>
+        <div id="conn-pill" class="conn-pill ok">
+          <span class="conn-pill-title">CONNECTED</span>
+          <span class="conn-pill-msg">Connection re-established.</span>
+        </div>
+        <div class="header-right">
+          <div class="header-clock">
+            <div id="now-time">--:--:--</div>
+            <div id="now-date" class="muted">—</div>
+          </div>
+          <button class="header-btn" id="inject-btn" title="Inject axis-4 anomaly">⚠ Inject</button>
+          <select class="header-select"><option>Last 15 minutes</option></select>
+        </div>
+      </header>
+
+      <!-- Joint positions + Joint summary -->
+      <section class="row">
+        <div class="card flex-3">
+          <div class="card-title">JOINT POSITIONS <span class="muted">(deg)</span></div>
+          <div class="gauges-grid" id="gauges"></div>
+        </div>
+        <aside class="card flex-1">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M14 6l-3 3 4 4-3 3 3 3 6-6-6-6-1-1zM5 11h7v2H5z"/></svg>
+            JOINT SUMMARY
+          </div>
+          <div class="summary-grid">
+            <div><div class="summary-num" id="sum-axes">6</div><div class="summary-lbl">Axes</div></div>
+            <div><div class="summary-num green" id="sum-status">Live</div><div class="summary-lbl">Status</div></div>
+            <div><div class="summary-num" id="sum-min">-</div><div class="summary-lbl">Min Position</div></div>
+            <div><div class="summary-num" id="sum-max">-</div><div class="summary-lbl">Max Position</div></div>
+            <div><div class="summary-num" id="sum-avg">-</div><div class="summary-lbl">Avg Deviation</div></div>
+            <div><div class="summary-num" id="sum-alerts">0</div><div class="summary-lbl">Alerts</div></div>
+          </div>
+        </aside>
+      </section>
+
+      <!-- Motor Temperatures -->
+      <section class="row">
+        <div class="card flex-1">
+          <div class="card-title">
+            MOTOR TEMPERATURES <span class="muted">(°C)</span>
+            <span class="legend" id="legend"></span>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="temp-chart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer panels -->
+      <section class="row footer-row">
+        <div class="card">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 2L1 12h3v9h6v-6h4v6h6v-9h3z"/></svg>
+            STATUS
+          </div>
+          <div class="status-row">
+            <div>
+              <div class="status-state" id="ps-label">—</div>
+              <div class="muted" id="ps-tag">All systems normal</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M5 9.2h3v9.6H5zm5.6-4.4h3v14h-3zm5.6 8.4h3v5.6h-3z"/></svg>
+            PERFORMANCE
+          </div>
+          <div class="perf-grid">
+            <div><div class="perf-num" id="perf-cycle">— s</div><div class="perf-lbl">Cycle Time</div></div>
+            <div><div class="perf-num" id="perf-throughput">—</div><div class="perf-lbl">Throughput<br/><span class="muted">parts/hour</span></div></div>
+            <div><div class="perf-num" id="perf-eff">—%</div><div class="perf-lbl">Efficiency</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 22a2 2 0 002-2h-4a2 2 0 002 2zm6-6V11a6 6 0 00-5-5.92V4a1 1 0 00-2 0v1.08A6 6 0 006 11v5l-2 2v1h16v-1z"/></svg>
+            ALERTS
+          </div>
+          <div class="alerts-row">
+            <div class="alerts-state" id="alerts-state">No active alerts</div>
+            <div class="muted" id="alerts-tag">All clear</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Recommendation panel (visible when active) -->
+      <section class="row" id="reco-row" style="display:none">
+        <div class="card flex-1 reco-card">
+          <div class="card-title">⚠ ACTIVE RECOMMENDATION (Operator HITL)</div>
+          <div class="reco-body">
+            <div class="reco-title" id="reco-title">—</div>
+            <div class="reco-cite muted" id="reco-cite">—</div>
+            <div class="reco-rationale" id="reco-rationale">—</div>
+            <div class="reco-actions">
+              <button class="btn btn-ok" id="approve-btn">✓ Approve</button>
+              <button class="btn btn-no" id="reject-btn">✕ Reject</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

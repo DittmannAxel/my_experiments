@@ -21,6 +21,15 @@ http:
         - websecure
       tls: {}
 
+    dashboard:
+      rule: "Host(`stack.local`) && PathPrefix(`/dashboard`)"
+      service: dashboard
+      priority: 100
+      entryPoints: [websecure]
+      tls: {}
+      middlewares:
+        - dashboard-strip
+
     # ──────────── Phase 1b: Node-RED ────────────
     nodered:
       rule: "Host(`stack.local`) && PathPrefix(`/nodered`)"
@@ -60,6 +69,11 @@ http:
         servers:
           - url: "http://landing-page:80"
 
+    dashboard:
+      loadBalancer:
+        servers:
+          - url: "http://dashboard:8080"
+
     nodered:
       loadBalancer:
         servers:
@@ -82,3 +96,7 @@ http:
       stripPrefix:
         prefixes:
           - "/spec"
+    dashboard-strip:
+      stripPrefix:
+        prefixes:
+          - "/dashboard"

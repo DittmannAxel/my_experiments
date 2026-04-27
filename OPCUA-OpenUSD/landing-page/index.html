@@ -54,9 +54,13 @@
       <span id="inject-msg" style="margin-left: 12px; color: var(--muted);"></span>
     </div>
     <div class="grid">
-      <a class="card" href="/nodered/dashboard/" target="_blank" rel="noopener">
-        <div class="title">Node-RED Dashboard <span class="badge" data-svc="nodered"></span></div>
-        <div class="desc">Live OPC UA values, recommendation approval flow.</div>
+      <a class="card" href="/dashboard/" target="_blank" rel="noopener">
+        <div class="title">🤖 Robotics Dashboard <span class="badge" data-svc="dashboard"></span></div>
+        <div class="desc">Custom dark-theme operator console — gauges, motor temps, HITL approval.</div>
+      </a>
+      <a class="card" href="/nodered/" target="_blank" rel="noopener">
+        <div class="title">Node-RED Editor <span class="badge" data-svc="nodered"></span></div>
+        <div class="desc">Flow editor for the legacy Dashboard 2.0 view.</div>
       </a>
       <a class="card" href="/grafana/" target="_blank" rel="noopener">
         <div class="title">Grafana <span class="badge" data-svc="grafana"></span></div>
@@ -79,7 +83,8 @@
     // Best-effort badge updater. Each service sets its badge to "ok" if its
     // landing path returns 2xx within 2 s. Unreachable = stays grey.
     const probes = {
-      nodered: "/nodered/dashboard/",
+      dashboard: "/dashboard/api/health",
+      nodered: "/nodered/",
       grafana: "/grafana/api/health",
       usd: "/usd/",
       spec: "/spec/health",

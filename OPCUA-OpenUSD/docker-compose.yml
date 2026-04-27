@@ -46,6 +46,18 @@ services:
     networks:
       - stack
 
+  dashboard:
+    build: ./dashboard
+    container_name: rt-dashboard
+    restart: unless-stopped
+    depends_on:
+      opcua-server:
+        condition: service_healthy
+    environment:
+      - OPCUA_ENDPOINT=opc.tcp://opcua-server:4840/axel/robot
+    networks:
+      - stack
+
   opcua-nodered:
     build: ./opcua-nodered
     container_name: rt-nodered
