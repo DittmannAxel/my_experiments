@@ -1,0 +1,96 @@
+#usda 1.0
+(
+    defaultPrim = "World"
+    upAxis = "Y"
+)
+
+def Xform "World"
+{
+    def Xform "Cell"
+    {
+        # Floor
+        def Mesh "Floor"
+        {
+            point3f[] points = [(-3, 0, -3), (3, 0, -3), (3, 0, 3), (-3, 0, 3)]
+            int[] faceVertexCounts = [4]
+            int[] faceVertexIndices = [0, 1, 2, 3]
+            color3f[] primvars:displayColor = [(0.32, 0.34, 0.38)]
+            normal3f[] normals = [(0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0)]
+        }
+
+        # Pickup station (left)
+        def Cube "PickupStation"
+        {
+            double size = 0.4
+            color3f[] primvars:displayColor = [(0.30, 0.50, 0.78)]
+            matrix4d xformOp:transform = ( (1,0,0,0), (0,1,0,0), (0,0,1,0), (-1.4, 0.2, 1.0, 1) )
+            uniform token[] xformOpOrder = ["xformOp:transform"]
+        }
+
+        # Dropoff station (right)
+        def Cube "DropoffStation"
+        {
+            double size = 0.4
+            color3f[] primvars:displayColor = [(0.30, 0.78, 0.50)]
+            matrix4d xformOp:transform = ( (1,0,0,0), (0,1,0,0), (0,0,1,0), (1.4, 0.2, 1.0, 1) )
+            uniform token[] xformOpOrder = ["xformOp:transform"]
+        }
+
+        # Status pad (turns red on MaintenanceRequired). The bridge writes to
+        # /World/Cell/StatusPad.primvars:displayColor in live.usda.
+        def Cube "StatusPad"
+        {
+            double size = 0.3
+            color3f[] primvars:displayColor = [(0.18, 0.78, 0.18)]
+            matrix4d xformOp:transform = ( (1,0,0,0), (0,0.05,0,0), (0,0,1,0), (0, 0.025, -1.5, 1) )
+            uniform token[] xformOpOrder = ["xformOp:transform"]
+        }
+
+        # Fence corners — four short pillars
+        def Xform "Fence"
+        {
+            def Cube "C1"
+            {
+                double size = 0.05
+                color3f[] primvars:displayColor = [(0.7, 0.6, 0.1)]
+                matrix4d xformOp:transform = ( (1,0,0,0), (0,4,0,0), (0,0,1,0), (-2.5, 0.1, -2.5, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+            def Cube "C2"
+            {
+                double size = 0.05
+                color3f[] primvars:displayColor = [(0.7, 0.6, 0.1)]
+                matrix4d xformOp:transform = ( (1,0,0,0), (0,4,0,0), (0,0,1,0), (2.5, 0.1, -2.5, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+            def Cube "C3"
+            {
+                double size = 0.05
+                color3f[] primvars:displayColor = [(0.7, 0.6, 0.1)]
+                matrix4d xformOp:transform = ( (1,0,0,0), (0,4,0,0), (0,0,1,0), (-2.5, 0.1, 2.5, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+            def Cube "C4"
+            {
+                double size = 0.05
+                color3f[] primvars:displayColor = [(0.7, 0.6, 0.1)]
+                matrix4d xformOp:transform = ( (1,0,0,0), (0,4,0,0), (0,0,1,0), (2.5, 0.1, 2.5, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+        }
+    }
+
+    def DistantLight "KeyLight"
+    {
+        float inputs:intensity = 2500
+        float3 inputs:color = (1, 0.95, 0.9)
+        matrix4d xformOp:transform = ( (1,0,0,0), (0,1,0,0), (0,0,1,0), (0,5,0,1) )
+        uniform token[] xformOpOrder = ["xformOp:transform"]
+    }
+
+    def DomeLight "FillDome"
+    {
+        float inputs:intensity = 300
+        float3 inputs:color = (0.78, 0.86, 0.94)
+    }
+}

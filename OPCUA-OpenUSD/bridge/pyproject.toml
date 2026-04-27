@@ -1,0 +1,17 @@
+[project]
+name = "bridge"
+version = "0.1.0"
+description = "OPC UA → OpenUSD live bridge"
+requires-python = ">=3.11"
+dependencies = [
+    "asyncua>=1.1.5",
+    "usd-core>=24.05",
+    "pydantic>=2.7",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["src"]

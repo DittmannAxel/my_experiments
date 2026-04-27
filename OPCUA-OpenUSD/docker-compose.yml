@@ -58,6 +58,23 @@ services:
     # No /data volume on purpose — flows.json + settings.js are baked
     # into the image so the dashboard is reproducible across rebuilds.
 
+  bridge:
+    build: ./bridge
+    container_name: rt-bridge
+    restart: unless-stopped
+    depends_on:
+      opcua-server:
+        condition: service_healthy
+    environment:
+      - OPCUA_ENDPOINT=opc.tcp://opcua-server:4840/axel/robot
+      - USD_STAGE_DIR=/stage
+      - USD_ASSETS_DIR=/usd-assets
+    volumes:
+      - ./usd-assets:/usd-assets:ro
+      - usd-stage:/stage
+    networks:
+      - stack
+
 networks:
   stack:
     name: stack
@@ -65,3 +82,4 @@ networks:
 
 volumes:
   opcua-certs:
+  usd-stage:

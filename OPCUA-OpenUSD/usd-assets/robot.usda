@@ -1,0 +1,142 @@
+#usda 1.0
+(
+    defaultPrim = "World"
+    upAxis = "Y"
+)
+
+# 6-axis articulated chain — simplified rig. Each Joint is an Xform whose
+# rotation the bridge mutates at runtime via overrides in live.usda.
+#
+# Hierarchy:
+#   /World/Robot/Base/Joint1/Link1/Joint2/Link2/.../Joint6/Tool
+#
+# Conventions (documented also in bridge/src/usd_writer.py):
+#   Joint1 — yaw   (rotateY)
+#   Joint2 — pitch (rotateX)
+#   Joint3 — pitch (rotateX)
+#   Joint4 — roll  (rotateZ)
+#   Joint5 — pitch (rotateX)
+#   Joint6 — roll  (rotateZ)
+
+def Xform "World"
+{
+    def Xform "Robot"
+    {
+        def Xform "Base"
+        {
+            float3 xformOp:translate = (0, 0, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+
+            def Cylinder "BaseGeo"
+            {
+                double radius = 0.18
+                double height = 0.10
+                token axis = "Y"
+                color3f[] primvars:displayColor = [(0.45, 0.46, 0.50)]
+            }
+
+            def Xform "Joint1"
+            {
+                float3 xformOp:rotateXYZ = (0, 0, 0)
+                uniform token[] xformOpOrder = ["xformOp:rotateXYZ"]
+
+                def Cylinder "Link1"
+                {
+                    double radius = 0.07
+                    double height = 0.40
+                    token axis = "Y"
+                    color3f[] primvars:displayColor = [(0.55, 0.58, 0.62)]
+                    matrix4d xformOp:transform = ( (1,0,0,0), (0,1,0,0), (0,0,1,0), (0, 0.20, 0, 1) )
+                    uniform token[] xformOpOrder = ["xformOp:transform"]
+                }
+
+                def Xform "Joint2"
+                {
+                    float3 xformOp:translate = (0, 0.40, 0)
+                    float3 xformOp:rotateXYZ = (0, 0, 0)
+                    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ"]
+
+                    def Cylinder "Link2"
+                    {
+                        double radius = 0.06
+                        double height = 0.35
+                        token axis = "Y"
+                        color3f[] primvars:displayColor = [(0.55, 0.58, 0.62)]
+                        matrix4d xformOp:transform = ( (1,0,0,0), (0,1,0,0), (0,0,1,0), (0, 0.175, 0, 1) )
+                        uniform token[] xformOpOrder = ["xformOp:transform"]
+                    }
+
+                    def Xform "Joint3"
+                    {
+                        float3 xformOp:translate = (0, 0.35, 0)
+                        float3 xformOp:rotateXYZ = (0, 0, 0)
+                        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ"]
+
+                        def Cylinder "Link3"
+                        {
+                            double radius = 0.05
+                            double height = 0.30
+                            token axis = "Y"
+                            color3f[] primvars:displayColor = [(0.55, 0.58, 0.62)]
+                            matrix4d xformOp:transform = ( (1,0,0,0), (0,1,0,0), (0,0,1,0), (0, 0.15, 0, 1) )
+                            uniform token[] xformOpOrder = ["xformOp:transform"]
+                        }
+
+                        def Xform "Joint4"
+                        {
+                            float3 xformOp:translate = (0, 0.30, 0)
+                            float3 xformOp:rotateXYZ = (0, 0, 0)
+                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ"]
+
+                            def Cylinder "Link4"
+                            {
+                                double radius = 0.045
+                                double height = 0.20
+                                token axis = "Y"
+                                color3f[] primvars:displayColor = [(0.55, 0.58, 0.62)]
+                                matrix4d xformOp:transform = ( (1,0,0,0), (0,1,0,0), (0,0,1,0), (0, 0.10, 0, 1) )
+                                uniform token[] xformOpOrder = ["xformOp:transform"]
+                            }
+
+                            def Xform "Joint5"
+                            {
+                                float3 xformOp:translate = (0, 0.20, 0)
+                                float3 xformOp:rotateXYZ = (0, 0, 0)
+                                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ"]
+
+                                def Cylinder "Link5"
+                                {
+                                    double radius = 0.04
+                                    double height = 0.15
+                                    token axis = "Y"
+                                    color3f[] primvars:displayColor = [(0.55, 0.58, 0.62)]
+                                    matrix4d xformOp:transform = ( (1,0,0,0), (0,1,0,0), (0,0,1,0), (0, 0.075, 0, 1) )
+                                    uniform token[] xformOpOrder = ["xformOp:transform"]
+                                }
+
+                                def Xform "Joint6"
+                                {
+                                    float3 xformOp:translate = (0, 0.15, 0)
+                                    float3 xformOp:rotateXYZ = (0, 0, 0)
+                                    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ"]
+
+                                    def Xform "Tool"
+                                    {
+                                        float3 xformOp:translate = (0, 0.06, 0)
+                                        uniform token[] xformOpOrder = ["xformOp:translate"]
+
+                                        def Cube "ToolGeo"
+                                        {
+                                            double size = 0.06
+                                            color3f[] primvars:displayColor = [(0.95, 0.78, 0.20)]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
