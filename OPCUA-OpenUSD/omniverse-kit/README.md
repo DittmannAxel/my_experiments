@@ -19,7 +19,7 @@ Wired into the compose stack. The image must be built from the upstream
 ## Architecture
 
 ```
-Mac browser  ──HTTPS──▶ Traefik (stack.local)  ──HTTP──▶ omniverse-kit:8011 (signaling)
+Mac browser  ──HTTPS──▶ Traefik (stack.local)  ──TCP──▶ omniverse-kit:49100 (signaling)
         ▲                                                         │
         └────────────────────  WebRTC UDP 47995-48005  ◀──────────┘
                                   (direct to host)

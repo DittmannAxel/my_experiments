@@ -237,10 +237,12 @@ services:
     volumes:
       - usd-stage:/stage:ro
     expose:
-      # HTTP signaling port (omni.kit.livestream.app default).
-      - "8011"
+      # WebRTC signaling (TCP). Default for omni.kit.livestream.app primaryStream
+      # is 49100 — see omni.kit.livestream.app/config/extension.toml.
+      - "49100"
     ports:
       # WebRTC media — UDP, must be host-published, NOT proxied via Traefik.
+      # Includes the default streamPort 47998 and headroom for spectator streams.
       - "47995-48005:47995-48005/udp"
     networks:
       - stack

@@ -88,7 +88,8 @@ http:
     usd:
       loadBalancer:
         servers:
-          - url: "http://omniverse-kit:8011"
+          # 49100 is the omni.kit.livestream.app default primaryStream signalPort.
+          - url: "http://omniverse-kit:49100"
     spec:
       loadBalancer:
         servers:
