@@ -43,7 +43,7 @@ async def main():
 
     server.set_endpoint("opc.tcp://0.0.0.0:4840/axel/robot")
     server.set_server_name("AxelRobotTwin")
-    server.set_application_uri("urn:axel:robot:server")
+    await server.set_application_uri("urn:axel:robot:server")
 
     # Security policies: None (anonymous browse) + Basic256Sha256 (Sign / SignAndEncrypt).
     server.set_security_policy([
@@ -51,7 +51,10 @@ async def main():
         ua.SecurityPolicyType.Basic256Sha256_Sign,
         ua.SecurityPolicyType.Basic256Sha256_SignAndEncrypt,
     ])
-    server.set_security_IDs(["Anonymous", "Username"])
+    server.set_identity_tokens([
+        ua.AnonymousIdentityToken(),
+        ua.UserNameIdentityToken(),
+    ])
 
     # Load own cert/key.
     if SERVER_CERT.exists() and SERVER_KEY.exists():

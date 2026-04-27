@@ -8,6 +8,8 @@ import os
 import random
 import time
 
+from asyncua import ua
+
 from .robotics_model import AddressSpace
 
 log = logging.getLogger("simulator")
@@ -55,7 +57,9 @@ class Simulator:
     async def run(self):
         last_state_change = time.monotonic()
         program_state = 2  # Running
-        await self.addr.program_state.write_value(program_state)
+        await self.addr.program_state.write_value(
+            ua.Variant(program_state, ua.VariantType.Int32)
+        )
 
         while not self._stop.is_set():
             tick_start = time.monotonic()
@@ -88,12 +92,16 @@ class Simulator:
             new_cycle = int(t / (WAYPOINT_DURATION_S * len(WAYPOINTS)))
             if new_cycle != self.cycle:
                 self.cycle = new_cycle
-                await self.addr.cycle_counter.write_value(new_cycle)
+                await self.addr.cycle_counter.write_value(
+                    ua.Variant(new_cycle, ua.VariantType.UInt64)
+                )
 
             # ProgramState heartbeat: cycle through Running/Stopping/Idle every ~30 s
             if time.monotonic() - last_state_change > 30.0:
                 program_state = {2: 3, 3: 0, 0: 2}.get(program_state, 2)
-                await self.addr.program_state.write_value(program_state)
+                await self.addr.program_state.write_value(
+                    ua.Variant(program_state, ua.VariantType.Int32)
+                )
                 last_state_change = time.monotonic()
 
             # Thermal model.
