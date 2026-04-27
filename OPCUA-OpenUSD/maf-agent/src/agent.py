@@ -92,9 +92,9 @@ def _get_agent() -> Agent:
             base_url=VLLM_BASE_URL,
         )
         _agent = Agent(
+            _chat_client,
+            SYSTEM_PROMPT,
             name="robot-twin-agent",
-            chat_client=_chat_client,
-            instructions=SYSTEM_PROMPT,
             tools=[query_specification, write_recommendation_to_opcua],
         )
         log.info(
