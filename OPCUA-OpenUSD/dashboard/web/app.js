@@ -229,11 +229,21 @@ function applySnapshot(snap) {
     psTag.textContent = "All systems normal";
   }
 
-  document.getElementById("perf-cycle").textContent = "1.20 s";
-  document.getElementById("perf-throughput").textContent = String(snap.cycle_counter * 12);
-  const maxMotor = Math.max(...Object.values(snap.axes).map(a => a.motor_temp));
-  const eff = Math.max(20, 100 - Math.max(0, (maxMotor - 30)) * 0.8);
-  document.getElementById("perf-eff").textContent = eff.toFixed(1) + "%";
+  // Performance metrics are only meaningful while the cell is producing.
+  // When the operator has stopped or maintenance is required, the throughput
+  // and efficiency numbers freeze on the last live value would be misleading,
+  // so render them as paused placeholders instead.
+  const isProducing = snap.program_state === 2;
+  document.getElementById("perf-cycle").textContent = isProducing ? "1.20 s" : "—";
+  document.getElementById("perf-throughput").textContent =
+    isProducing ? String(snap.cycle_counter * 12) : "—";
+  if (isProducing) {
+    const maxMotor = Math.max(...Object.values(snap.axes).map(a => a.motor_temp));
+    const eff = Math.max(20, 100 - Math.max(0, (maxMotor - 30)) * 0.8);
+    document.getElementById("perf-eff").textContent = eff.toFixed(1) + "%";
+  } else {
+    document.getElementById("perf-eff").textContent = "Paused";
+  }
 
   const overheats = Object.entries(snap.axes).filter(([, a]) => a.motor_temp >= 90).length;
   document.getElementById("sum-alerts").textContent = String(overheats);

@@ -9,8 +9,12 @@ from dataclasses import dataclass, field
 log = logging.getLogger("anomaly")
 
 THRESHOLD_C = 90.0
-DURATION_S = 10.0
-COOLDOWN_S = 120.0  # don't re-fire same anomaly within this window
+# Tightened for live-demo cadence: simulator ramp is now 8 s, so a 3 s
+# sustained-above window is enough to suppress one-frame spikes while letting
+# the agent fire ~12 s after Inject. 30 s cooldown lets the operator repeat
+# the demo without waiting two minutes between injections.
+DURATION_S = 3.0
+COOLDOWN_S = 30.0
 
 
 @dataclass

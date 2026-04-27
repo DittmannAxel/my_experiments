@@ -169,14 +169,23 @@ class Simulator:
                 # Actual axis temp is a bit cooler than motor.
                 self.actual_temp[i] = T_AMBIENT + (self.motor_temp[i] - T_AMBIENT) * 0.6
 
-            # Anomaly injection.
-            if self.anomaly_name == "axis4_overheat":
+            # Anomaly injection. Only clamps the temp upward while the robot
+            # is actually moving — physically the motor heats from current
+            # under load, so when the operator stops the cell (ProgramState=6
+            # MaintenanceRequired) the standard cooling term takes over and
+            # temp drops back toward ambient. Without this gate, "Stop" did
+            # nothing visible, which is misleading.
+            if self.anomaly_name == "axis4_overheat" and is_running:
                 if self.anomaly_t_start is None:
                     self.anomaly_t_start = time.monotonic()
-                # Ramp axis 4 motor temp from baseline → 95 °C over 60 s
+                # Ramp axis 4 motor temp baseline → 95 °C over 8 s. Demo
+                # cadence: a 60 s ramp made the audience wait through over a
+                # minute of climbing temperature before the anomaly detector
+                # triggered the agent. 8 s is enough for the curve to look
+                # like a ramp and not a step.
                 age = time.monotonic() - self.anomaly_t_start
-                target = min(95.0, T_BASE_MOTOR + (95.0 - T_BASE_MOTOR) * (age / 60.0))
-                # Gently pull axis-4 motor temp up toward `target`
+                target = min(95.0, T_BASE_MOTOR + (95.0 - T_BASE_MOTOR) * (age / 8.0))
+                # Pull axis-4 motor temp up toward `target`.
                 self.motor_temp[3] = max(self.motor_temp[3], target + random.uniform(-0.3, 0.3))
 
             # Write back to OPC UA. Batch in a TaskGroup to avoid serial round-trips.
