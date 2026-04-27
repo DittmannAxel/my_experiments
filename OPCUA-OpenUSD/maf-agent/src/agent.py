@@ -101,16 +101,17 @@ def _format_anomaly(ev: AnomalyEvent) -> str:
 
 async def handle_anomaly(ev: AnomalyEvent) -> None:
     """One-shot agent run for an anomaly. Loops while the model emits tool calls."""
+    # Nemotron's chat template requires strict role alternation, so we fold
+    # the reasoning toggle ("detailed thinking off") into the front of the
+    # main system prompt rather than sending two system messages.
+    system_msg = "detailed thinking off\n\n" + SYSTEM_PROMPT
     messages: list[dict] = [
-        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "system", "content": system_msg},
         {"role": "user", "content": _format_anomaly(ev)},
     ]
     log.info("Agent reasoning over anomaly axis=%d", ev.axis)
 
     spec_query_count = 0
-    # Nemotron-style reasoning toggle: "off" keeps responses tight + tool-calling
-    # focused. (Qwen used `enable_thinking`; Nemotron uses a system message.)
-    messages.insert(0, {"role": "system", "content": "detailed thinking off"})
     for step in range(12):
         # After 2 spec queries, force the model to write a recommendation.
         force_write = spec_query_count >= 2

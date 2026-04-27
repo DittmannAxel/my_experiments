@@ -42,9 +42,9 @@ async def answer(question: str, chunks: list[Chunk]) -> str:
     resp = await client.chat.completions.create(
         model=VLLM_MODEL,
         messages=[
-            # Nemotron reasoning toggle. "off" → direct answer, "on" → CoT first.
-            {"role": "system", "content": "detailed thinking off"},
-            {"role": "system", "content": SYSTEM_PROMPT},
+            # Nemotron expects strict role alternation, so the reasoning
+            # toggle is folded into the main system message.
+            {"role": "system", "content": "detailed thinking off\n\n" + SYSTEM_PROMPT},
             {"role": "user", "content": user_msg},
         ],
         temperature=0.1,
