@@ -222,44 +222,48 @@ async def clear_anomaly() -> dict:
 
 @app.post("/api/reset")
 async def reset() -> dict:
-    """Recover from MaintenanceRequired/Aborted by clearing the active
-    recommendation, clearing any anomaly, and writing ProgramState=2 (Running).
-    The simulator picks up the external write and resumes the trajectory.
+    """Recover from MaintenanceRequired/Aborted by calling the single
+    authoritative OPC UA recovery method `ResetMaintenance`. The server-side
+    method clears the anomaly + active recommendation, signals the simulator
+    to thermal-reset (motor and actual temps return to baseline), and writes
+    ProgramState=2 (Running). Returning Bad → HTTP 502.
     """
     async with Client(url=OPCUA_ENDPOINT) as c:
         ns = await c.get_namespace_index("urn:axel:robot")
-        ns_r = await c.get_namespace_index("urn:axel:robot:recommendations")
-        # Clear anomaly (so the agent doesn't immediately re-recommend).
-        method_inj = c.get_node(f"ns={ns};s=RobotController.TaskControl.InjectAnomaly")
         tc = c.get_node(f"ns={ns};s=RobotController.TaskControl")
-        try:
-            await tc.call_method(method_inj, ua.Variant("", ua.VariantType.String))
-        except Exception:
-            pass
-        # Clear active recommendation.
-        try:
-            active = c.get_node(f"ns={ns_r};s=RobotRecommendations.ActiveRecommendation")
-            await active.write_value(ua.Variant("", ua.VariantType.String))
-        except Exception:
-            pass
-        # Force ProgramState back to Running (=2). The simulator now honors
-        # external writes from any state, so this resumes motion.
-        ps = c.get_node(f"ns={ns};s=RobotController.ProgramState")
-        await ps.write_value(ua.Variant(2, ua.VariantType.Int32))
+        method = c.get_node(f"ns={ns};s=RobotController.TaskControl.ResetMaintenance")
+        await tc.call_method(method)
+    # asyncua call_method raises on non-Good StatusCodes, so a clean return
+    # here means the server-side reset completed.
     return {"status": "ok"}
 
 
 @app.post("/api/approve")
 async def approve(approved: bool = True) -> dict:
+    """Apply or reject the active recommendation. The server-side
+    `ApproveRecommendation` method returns BadInvalidState when there is no
+    active recommendation to act on; surface that as HTTP 409 so the dashboard
+    UI can stop pretending success when nothing actually happened.
+    """
+    from fastapi import HTTPException
     async with Client(url=OPCUA_ENDPOINT) as c:
         ns_r = await c.get_namespace_index("urn:axel:robot:recommendations")
         obj = c.get_node(f"ns={ns_r};s=RobotRecommendations")
         method = c.get_node(f"ns={ns_r};s=RobotRecommendations.ApproveRecommendation")
-        await obj.call_method(
-            method,
-            ua.Variant("current", ua.VariantType.String),
-            ua.Variant(bool(approved), ua.VariantType.Boolean),
-        )
+        try:
+            await obj.call_method(
+                method,
+                ua.Variant("current", ua.VariantType.String),
+                ua.Variant(bool(approved), ua.VariantType.Boolean),
+            )
+        except ua.UaStatusCodeError as e:
+            # asyncua wraps non-Good StatusCodes from method calls into
+            # UaStatusCodeError. The most common case is "no active
+            # recommendation" → BadInvalidState.
+            raise HTTPException(
+                status_code=409,
+                detail=f"OPC UA method rejected: {e!s}",
+            ) from e
     return {"status": "ok", "approved": approved}
 
 

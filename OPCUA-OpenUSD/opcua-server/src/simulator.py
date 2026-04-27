@@ -88,17 +88,32 @@ class Simulator:
             dt_real = now - getattr(self, "_last_tick", now)
             self._last_tick = now
 
-            # Read external program-state writes. Two paths flip this:
-            #   (a) agent → ApproveRecommendation → ProgramState=6 (Maintenance)
-            #   (b) operator → dashboard Reset → ProgramState=2 (Running)
-            # Honor any external transition; otherwise we'd get stuck in 6
-            # forever, with no way to resume the demo without restarting the
-            # container.
+            # Latch semantics:
+            #   - heartbeat states {2 Running, 3 Stopping, 0 Idle} freely accept
+            #     external transitions (agent flow → 6 MaintenanceRequired)
+            #   - latched states {4 Stopped, 5 Aborted, 6 MaintenanceRequired}
+            #     ignore direct ProgramState writes — recovery is only via
+            #     ResetMaintenance, which sets `addr.reset_event` and writes 2
+            # This addresses an adversarial-review finding: a bare
+            # external-write recovery path silently overrode the maintenance
+            # halt. The Reset event is the single authoritative path out.
             try:
-                ext_ps = int(await self.addr.program_state.read_value())
-                if ext_ps != program_state:
-                    program_state = ext_ps
+                if self.addr.reset_event.is_set():
+                    # Operator reset: cool the thermal model back to baseline,
+                    # accept the new ProgramState, then clear the flag.
+                    self.motor_temp = [T_BASE_MOTOR] * 6
+                    self.actual_temp = [T_AMBIENT + 3.0] * 6
+                    program_state = 2
                     last_state_change = now
+                    self.anomaly_name = ""
+                    self.anomaly_t_start = None
+                    self.addr.reset_event.clear()
+                    log.info("Operator reset — thermal state baselined, ProgramState=2")
+                else:
+                    ext_ps = int(await self.addr.program_state.read_value())
+                    if ext_ps != program_state and program_state in (2, 3, 0):
+                        program_state = ext_ps
+                        last_state_change = now
             except Exception:
                 pass
 

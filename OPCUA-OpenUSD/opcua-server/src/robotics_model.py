@@ -54,6 +54,13 @@ class AddressSpace:
 
     anomaly_injected: object = None  # variable, set by InjectAnomaly method
 
+    # Set by ResetMaintenance; the simulator consumes this on its next tick to
+    # reset thermal state + force ProgramState back to Running, then clears it.
+    # This is the single authoritative recovery path out of MaintenanceRequired
+    # (=6) / Aborted (=5) — direct external writes to ProgramState in those
+    # latched states are otherwise ignored.
+    reset_event: asyncio.Event = field(default_factory=asyncio.Event)
+
 
 def _nid(ns: int, path: str) -> ua.NodeId:
     """Stable string NodeId so external clients (dashboard, Telegraf, agent) can
@@ -145,11 +152,24 @@ async def build_address_space(server: Server) -> AddressSpace:
         _nid(ns_primary, "RobotController.TaskControl"), "TaskControl"
     )
 
+    # Forward declaration — `addr` is constructed below; we close over it lazily.
     @uamethod
     async def reset_maintenance(parent):  # noqa: ARG001
-        await program_state.write_value(
-            ua.Variant(0, ua.VariantType.Int32)
-        )  # back to Idle
+        # Single authoritative recovery: clear anomaly, drop active
+        # recommendation, signal the simulator to thermal-reset, then write
+        # ProgramState=2 (Running). The simulator's gate honors this transition
+        # only because `reset_event` is set; without it, latched states stay
+        # latched. See simulator.py:run() for the consumer side.
+        try:
+            await anomaly_var.write_value(ua.Variant("", ua.VariantType.String))
+        except Exception:
+            pass
+        try:
+            await active_reco.write_value(ua.Variant("", ua.VariantType.String))
+        except Exception:
+            pass
+        addr.reset_event.set()
+        await program_state.write_value(ua.Variant(2, ua.VariantType.Int32))
         return ua.StatusCode(ua.StatusCodes.Good)
 
     await task_control.add_method(
