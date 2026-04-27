@@ -108,6 +108,9 @@ async def handle_anomaly(ev: AnomalyEvent) -> None:
     log.info("Agent reasoning over anomaly axis=%d", ev.axis)
 
     spec_query_count = 0
+    # Nemotron-style reasoning toggle: "off" keeps responses tight + tool-calling
+    # focused. (Qwen used `enable_thinking`; Nemotron uses a system message.)
+    messages.insert(0, {"role": "system", "content": "detailed thinking off"})
     for step in range(12):
         # After 2 spec queries, force the model to write a recommendation.
         force_write = spec_query_count >= 2
@@ -121,9 +124,7 @@ async def handle_anomaly(ev: AnomalyEvent) -> None:
                 else "auto"
             ),
             temperature=0.2,
-            max_tokens=2048,
-            # Re-enable thinking so the model evaluates tool results
-            # between calls (improves convergence dramatically).
+            max_tokens=1024,
         )
         msg = resp.choices[0].message
 

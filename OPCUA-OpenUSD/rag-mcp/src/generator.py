@@ -42,14 +42,13 @@ async def answer(question: str, chunks: list[Chunk]) -> str:
     resp = await client.chat.completions.create(
         model=VLLM_MODEL,
         messages=[
+            # Nemotron reasoning toggle. "off" → direct answer, "on" → CoT first.
+            {"role": "system", "content": "detailed thinking off"},
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": user_msg},
         ],
         temperature=0.1,
-        max_tokens=2048,
-        # Qwen3 reasoning is separated by --reasoning-parser; we don't need
-        # the chain-of-thought in the user-visible answer.
-        extra_body={"chat_template_kwargs": {"enable_thinking": False}},
+        max_tokens=1024,
     )
     msg = resp.choices[0].message
     return (msg.content or getattr(msg, "reasoning", None) or "").strip()
