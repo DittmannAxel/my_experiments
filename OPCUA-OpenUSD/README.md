@@ -26,8 +26,8 @@ docker compose up -d                                # ≈10–15 min on first ru
 ./scripts/demo-anomaly.sh                           # walk the full anomaly story
 ```
 
-Then open `https://stack.local/` (after adding `192.168.21.230  stack.local` to your
-Mac's `/etc/hosts`).
+Then open `https://stack.local/` (after adding `<HOST_IP>  stack.local` to your
+Mac's `/etc/hosts`, where `<HOST_IP>` is the LAN address of the GPU host).
 
 ## URL map
 
@@ -42,12 +42,14 @@ Mac's `/etc/hosts`).
 | `/usd/` | Omniverse Kit viewer (Phase 4) |
 | `opc.tcp://stack.local:4840/axel/robot` | OPC UA endpoint (4840 also exposed on host) |
 
-## Host prerequisites (provisioned on `Beasty` / `192.168.21.230`)
+## Host prerequisites
 
+- Linux GPU host on the same LAN as the operator workstation
 - Docker 29.4+, Docker Compose v2, NVIDIA Container Runtime registered
-- 2× NVIDIA RTX 6000 Ada Generation (98 GB total VRAM)
-- bare-metal vLLM serving `Qwen/Qwen3.6-35B-A3B` on `:8000` with the flags
-  `--enable-auto-tool-choice --tool-call-parser qwen3_xml --reasoning-parser qwen3`
+- 2× modern NVIDIA RTX-class GPUs (≥48 GB each recommended for an LLM + Kit)
+- bare-metal vLLM serving an OpenAI-compatible API on `:8000` (model
+  configurable via `VLLM_MODEL` in `.env`); the agent + RAG-MCP reach it via
+  `host.docker.internal:8000` from inside the compose network
 
 Containers reach vLLM via `http://host.docker.internal:8000/v1`
 (BUILD.md Trap 1: `extra_hosts: host-gateway`).

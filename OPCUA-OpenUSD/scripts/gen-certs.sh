@@ -64,8 +64,8 @@ echo "[gen-certs] Done. Certs in $CERT_DIR:"
 ls -la "$CERT_DIR"
 echo
 echo "[gen-certs] Trust the root CA on your Mac to silence browser warnings:"
-echo "  scp axel@192.168.21.230:$CERT_DIR/rootCA.crt /tmp/axel-root-ca.crt"
-echo "  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain /tmp/axel-root-ca.crt"
+echo "  scp <user>@<HOST_IP>:$CERT_DIR/rootCA.crt /tmp/root-ca.crt"
+echo "  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain /tmp/root-ca.crt"
 echo
-echo "[gen-certs] Add to /etc/hosts on Mac:"
-echo "  192.168.21.230  $HOST"
+echo "[gen-certs] Add to /etc/hosts on Mac (HOST_IP is the GPU host's LAN IP):"
+echo "  <HOST_IP>  $HOST"

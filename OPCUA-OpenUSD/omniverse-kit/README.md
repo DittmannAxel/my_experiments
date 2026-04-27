@@ -39,18 +39,17 @@ Two paths from BUILD.md, in order of preference:
 
 ## GPU coordination with vLLM
 
-The host's vLLM uses both A6000s (`--tensor-parallel-size 2`,
-`--gpu-memory-utilization 0.93`). Before bringing up Omniverse Kit:
+If vLLM is using both GPUs (tensor-parallel) it will need to be stopped
+and restarted single-GPU before bringing up Omniverse Kit. Suggested order:
 
 ```bash
 # 1. Stop vLLM
-sudo systemctl stop vllm                 # or: pkill -f 'vllm serve'
+pkill -f 'vllm serve'
 
-# 2. Restart vLLM single-GPU on GPU 0 only
-CUDA_VISIBLE_DEVICES=0 ~/launch_vllm_35b_32k_gpu0.sh   # tensor-parallel-size=1
+# 2. Restart vLLM single-GPU on GPU 0 only (--tensor-parallel-size 1)
+CUDA_VISIBLE_DEVICES=0 ./launch_vllm_singlegpu.sh
 
 # 3. Bring up the Kit container pinned to GPU 1
-cd ~/dev/git/my_experiments/OPCUA-OpenUSD
 docker compose up -d omniverse-kit
 ```
 
